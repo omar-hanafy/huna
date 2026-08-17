@@ -180,11 +180,20 @@ export function toSession(state: AlertFlowState, base: AlertSession): AlertSessi
   };
 }
 
+/** Steps before the grounding sequence begins. */
+const PRE_GROUNDING: readonly AlertStep[] = ['safety', 'seal', 'state'];
+
 /**
  * Rebuilds flow state from a session that was left open, so a refresh or an
  * accidental navigation resumes rather than restarting from the safety question.
+ *
+ * `lockoutActive` re-surfaces the seal when the user comes back inside the
+ * reminder window and has not yet started the exercise. That is precisely the
+ * compulsion this feature exists for: leaving and returning to check again. Once
+ * grounding has begun, a refresh resumes where they were instead, because
+ * interrupting an exercise to repeat a reminder would be its own small harm.
  */
-export function resumeFrom(session: AlertSession): AlertFlowState {
+export function resumeFrom(session: AlertSession, lockoutActive = false): AlertFlowState {
   const base: AlertFlowState = {
     step: 'safety',
     sessionId: session.id,
@@ -198,11 +207,18 @@ export function resumeFrom(session: AlertSession): AlertFlowState {
     actionChosen: session.chosenAction !== null,
   };
 
-  if (session.safetyAnswer === null) return base;
-  if (session.safetyAnswer !== 'no') return { ...base, step: 'danger' };
-  if (session.stateId === null) return { ...base, step: 'state' };
-  if (session.chosenAction === null) return { ...base, step: 'sequence' };
-  return { ...base, step: 'action' };
+  const resumed = ((): AlertFlowState => {
+    if (session.safetyAnswer === null) return base;
+    if (session.safetyAnswer !== 'no') return { ...base, step: 'danger' };
+    if (session.stateId === null) return { ...base, step: 'state' };
+    if (session.chosenAction === null) return { ...base, step: 'sequence' };
+    return { ...base, step: 'action' };
+  })();
+
+  if (lockoutActive && PRE_GROUNDING.includes(resumed.step)) {
+    return { ...resumed, step: 'seal', sealVariant: 're-entry' };
+  }
+  return resumed;
 }
 
 export function isTerminal(state: AlertFlowState): boolean {

@@ -301,6 +301,34 @@ describe('resumeFrom', () => {
   it('preserves the recorded activation', () => {
     expect(resumeFrom({ ...base, activationBefore: 7 }).activationBefore).toBe(7);
   });
+
+  describe('with a recent check', () => {
+    /**
+     * Leaving and coming back to check again is the compulsion the seal exists
+     * for, so the reminder is re-surfaced rather than skipped over.
+     */
+    it('re-surfaces the seal before grounding has started', () => {
+      for (const session of [base, { ...base, safetyAnswer: 'no' as const }]) {
+        const state = resumeFrom(session, true);
+        expect(state.step).toBe('seal');
+        expect(state.sealVariant).toBe('re-entry');
+      }
+    });
+
+    /** Interrupting an exercise to repeat a reminder would be its own harm. */
+    it('does not interrupt a sequence already under way', () => {
+      const mid = { ...base, safetyAnswer: 'no' as const, stateId: 'startled' as const };
+      expect(resumeFrom(mid, true).step).toBe('sequence');
+    });
+
+    it('does not pull the user out of safety mode', () => {
+      expect(resumeFrom({ ...base, safetyAnswer: 'yes' }, true).step).toBe('danger');
+    });
+
+    it('leaves resume unchanged when no check is recent', () => {
+      expect(resumeFrom({ ...base, safetyAnswer: 'no' }, false).step).toBe('state');
+    });
+  });
 });
 
 describe('toSession', () => {

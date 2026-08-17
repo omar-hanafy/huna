@@ -69,13 +69,15 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     void (async () => {
       const open = await storage.getOpenAlertSession();
 
+      const lockout = lockoutState(lastCheck, new Date(), preferences.lockoutMinutes);
+
       if (!cancelled && open) {
         // A session left open means the app closed mid-episode. Pick it up
-        // where it was rather than starting the questions again.
+        // where it was, unless a check was logged very recently and grounding
+        // has not started, in which case the reminder comes first.
         sessionRef.current = open;
-        setState(resumeFrom(open));
+        setState(resumeFrom(open, lockout.active));
       } else if (!cancelled) {
-        const lockout = lockoutState(lastCheck, new Date(), preferences.lockoutMinutes);
         const fresh = startAlertFlow({
           sessionId: createId(),
           startedAt: new Date().toISOString(),
