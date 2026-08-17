@@ -111,7 +111,8 @@ describe('useDebouncedWrite', () => {
     const updateDay = vi.spyOn(storage, 'updateDay');
 
     wrap(storage, <Editor />);
-    await userEvent.type(screen.getByLabelText('note'), 'مساء');
+    // No inter-key delay, so all four keystrokes land inside one debounce window.
+    await userEvent.type(screen.getByLabelText('note'), 'مساء', { delay: null });
 
     await waitFor(() => expect(updateDay).toHaveBeenCalledTimes(1));
     expect((await storage.getDay('2026-08-17'))?.note).toBe('مساء');
@@ -123,7 +124,7 @@ describe('useDebouncedWrite', () => {
     const updateDay = vi.spyOn(storage, 'updateDay');
 
     const view = wrap(storage, <Editor />);
-    await userEvent.type(screen.getByLabelText('note'), 'x');
+    await userEvent.type(screen.getByLabelText('note'), 'x', { delay: null });
     view.unmount();
 
     await waitFor(() => expect(updateDay).toHaveBeenCalledTimes(1));

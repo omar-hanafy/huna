@@ -12,11 +12,12 @@ const IGNORED = new Set(['node_modules', 'dist', 'coverage', 'playwright-report'
 const EM_DASH = String.fromCharCode(0x2014);
 
 /**
- * Files still permitted to touch localStorage directly. Every entry is legacy
- * awaiting replacement by the AppStorage layer. The second assertion below
- * fails once an entry no longer exists, so this list cannot rot.
+ * Files still permitted to touch localStorage directly, all legacy awaiting
+ * replacement by the AppStorage layer. Now empty: the last one was removed with
+ * the سَكينة view layer. The third assertion fails on a stale entry, so this
+ * list cannot rot.
  */
-const LEGACY_LOCAL_STORAGE_FILES = ['src/hooks/usePersistentState.ts'];
+const LEGACY_LOCAL_STORAGE_FILES: string[] = [];
 
 function* walk(dir: string): Generator<string> {
   for (const entry of readdirSync(dir)) {

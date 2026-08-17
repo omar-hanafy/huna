@@ -186,7 +186,19 @@
     "recoveryMinutes": "Time to return after a wave",
     "dayRating": "How the day felt overall",
     "helpedToday": "What helped most today",
-    "autosaved": "Saved automatically on your device"
+    "autosaved": "Saved automatically on your device",
+    "checkInTitle": "Check the alarm",
+    "checkInCount": "{{done}} of {{total}} today",
+    "logCheckIn": "Log the check-in",
+    "eveningTitle": "End of day log",
+    "tasks": {
+      "orientation": "Orienting to the present, 2 minutes",
+      "breathing": "Calm breathing, 5 minutes",
+      "movement": "Gentle movement, 20 to 30 minutes",
+      "checkins": "3 alarm check-ins",
+      "relaxation": "Muscle release, 8 to 10 minutes",
+      "weekFocus": "This week's focus"
+    }
   },
   "tools": {
     "title": "Tools for practice, not for emergencies",
@@ -194,7 +206,53 @@
     "breathing": "Breathing",
     "grounding": "Senses",
     "relaxation": "Muscles",
-    "breathingHidden": "The breathing tool is hidden based on your answer at setup. You can show it again in settings."
+    "breathingHidden": "The breathing tool is hidden based on your answer at setup. You can show it again in settings.",
+    "breathingHelper": "Light, comfortable breaths, with the out-breath slightly longer and no holding.",
+    "breathingIn": "Breathe in",
+    "breathingOut": "Longer out-breath",
+    "breathingDone": "Return to your normal breathing",
+    "breathingReady": "Start when you're ready",
+    "cycleCount": "Cycle {{done}} of {{total}}",
+    "pause": "Pause",
+    "start": "Start",
+    "resume": "Resume",
+    "restart": "Restart",
+    "adjustRhythm": "Adjust the rhythm",
+    "inhale": "In",
+    "exhale": "Out",
+    "cycles": "Cycles",
+    "breathingCaution": "If you feel lightheaded, return to normal breathing right away. If focusing on your breath bothers you, use the senses exercise instead.",
+    "groundingHelper": "Notice what is already around you. Keep your eyes open throughout.",
+    "groundingDoneTitle": "You came back to the present",
+    "groundingDoneBody": "You do not have to feel completely calm. It is enough that your attention moved from predicting to what is happening now.",
+    "noticedOne": "Noticed one",
+    "noticedCount": "Noticed {{done}} of {{total}}",
+    "senses": {
+      "see": "Notice {{count}} things you can see",
+      "touch": "Notice {{count}} things you can feel",
+      "hear": "Notice {{count}} sounds you can hear",
+      "smell": "Notice {{count}} smells",
+      "taste": "Notice one taste"
+    },
+    "senseHints": {
+      "see": "A colour, a shape, the light, a piece of furniture.",
+      "touch": "Your feet on the floor, your back against the chair.",
+      "hear": "Something near or far, even if it is quiet.",
+      "smell": "Coffee, air, soap, or nothing in particular.",
+      "taste": "Water, mint, or imagine a familiar taste."
+    },
+    "relaxationHelper": "A gentle squeeze, then a longer release. Skip any painful area.",
+    "relaxationDone": "You finished the round. Notice the difference between tension and release.",
+    "tenseNow": "Tense gently",
+    "releaseNow": "Release",
+    "relaxationCaution": "Do not tense an injured or painful area. The squeeze is gentle, not maximum effort.",
+    "muscleGroups": {
+      "face": "Face and jaw",
+      "shoulders": "Shoulders and neck",
+      "hands": "Hands and arms",
+      "abdomen": "Abdomen",
+      "legs": "Legs and feet"
+    }
   },
   "journal": {
     "title": "Trigger log",

@@ -1,0 +1,59 @@
+.week-tabs {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.week-tabs button {
+  position: relative;
+  flex: 1;
+  min-block-size: var(--target-min);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-weight: 700;
+  font-size: var(--text-lg);
+  cursor: pointer;
+}
+
+.week-tabs button[aria-selected='true'] {
+  border-color: var(--primary);
+  background: var(--surface-calm);
+  color: var(--primary);
+}
+
+/* Marks the week the schedule suggests, without preventing any other choice. */
+.week-tabs__dot {
+  position: absolute;
+  inset-block-end: 6px;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: var(--radius-full);
+  background: var(--accent-sage);
+}
+
+.week-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  border-inline-start: 4px solid var(--accent-sage);
+}
+
+.week-card--blue {
+  border-inline-start-color: var(--accent-blue);
+}
+.week-card--sand {
+  border-inline-start-color: var(--accent-sand);
+}
+.week-card--amber {
+  border-inline-start-color: var(--accent-amber);
+}
+
+.week-card ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding-inline-start: var(--space-5);
+}

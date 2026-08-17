@@ -1,0 +1,55 @@
+/*
+ * The single consumer of --danger. See DangerAction.tsx for why, and
+ * src/design-system/danger.guard.test.ts for the check that keeps it that way.
+ */
+
+.danger-action {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  inline-size: 100%;
+  min-block-size: var(--target-min);
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--danger);
+  color: var(--danger-contrast);
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.danger-action:hover {
+  filter: brightness(1.08);
+}
+
+.danger-action__label {
+  font-weight: 700;
+  font-size: var(--text-lg);
+}
+
+.danger-action__note {
+  font-size: var(--text-xs);
+  opacity: 0.9;
+}
+
+/*
+ * Deliberately not red. Erasing your own data is destructive but it is not an
+ * emergency, and dressing it as one would make the settings screen feel unsafe.
+ */
+.destructive-action {
+  min-block-size: var(--target-min);
+  padding-inline: var(--space-5);
+  padding-block: var(--space-3);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.destructive-action:hover {
+  border-color: var(--text-muted);
+  background: var(--surface-sunken);
+}

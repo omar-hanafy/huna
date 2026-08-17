@@ -1,0 +1,68 @@
+.home {
+  gap: var(--space-6);
+}
+
+/*
+ * The single primary action. Large enough to hit without aiming, which is the
+ * whole requirement: reduced concentration is the condition, not the exception.
+ */
+.alert-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-block-size: 7rem;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--primary);
+  color: var(--primary-contrast);
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+  transition: background-color var(--duration-fast) var(--ease);
+}
+
+.alert-button:hover {
+  background: var(--primary-hover);
+}
+
+.alert-button__mark {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.alert-button__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.alert-button__text strong {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.alert-button__text small {
+  font-size: var(--text-sm);
+  opacity: 0.85;
+}
+
+.home-routine__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-block-end: var(--space-4);
+}
+
+.home-routine__head h2 {
+  font-size: var(--text-lg);
+}
+
+.home-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.home-date {
+  font-size: var(--text-sm);
+}

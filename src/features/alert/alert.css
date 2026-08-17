@@ -1,0 +1,67 @@
+/* Screens in the alert flow. Deliberately sparse. */
+
+.alert-safety h1,
+.alert-seal h1 {
+  font-size: var(--text-xl);
+}
+
+.danger-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0;
+  padding-inline-start: var(--space-5);
+}
+
+.state-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 40rem) {
+  .state-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.state-card {
+  align-items: flex-start;
+}
+
+/* One instruction, large enough to read with divided attention. */
+.sequence-instruction {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-block-size: 40dvh;
+  justify-content: center;
+  padding-block: var(--space-6);
+}
+
+.sequence-instruction__text {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  text-wrap: balance;
+}
+
+.sequence-secondary {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/*
+ * Discreet mode: the flow should read as an ordinary timer to anyone glancing
+ * over a shoulder. Illustrations are removed rather than merely muted.
+ */
+:root[data-discreet='true'] .state-card svg {
+  display: none;
+}
+
+:root[data-discreet='true'] .sequence-instruction__text {
+  font-size: var(--text-xl);
+  font-weight: 500;
+}

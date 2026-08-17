@@ -1,0 +1,18 @@
+/* Printing matters: a card that still works when the phone is dead. */
+@media print {
+  .tabbar,
+  .coping-card .button {
+    display: none;
+  }
+
+  .coping-card .textarea {
+    border: 0;
+    border-block-end: 1px solid #000;
+    border-radius: 0;
+    resize: none;
+  }
+
+  .app-shell__main {
+    padding-block-end: 0;
+  }
+}

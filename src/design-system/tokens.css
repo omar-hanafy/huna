@@ -1,0 +1,196 @@
+/*
+ * هنا design tokens.
+ *
+ * Light is the default identity: warm paper, closer to a quiet notebook than to
+ * a dashboard. Dark exists because this app gets opened at 3am, and it is a deep
+ * warm charcoal-green rather than black, which is harsh at that hour.
+ *
+ * Theme resolution, in order:
+ *   1. :root                                  light, the baseline
+ *   2. prefers-color-scheme: dark             the OS asked for dark
+ *   3. :root[data-theme='dark' | 'light']     the user overrode it in settings
+ *
+ * Contrast ratios in the comments are measured, not estimated.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #f7f4ee;
+  --surface-1: #ffffff;
+  --surface-calm: #dce8e2;
+  --surface-warm: #e8ded4;
+  --surface-sunken: #efeae1;
+
+  /* Ink */
+  --text: #18302a; /* 12.8:1 on --bg */
+  --text-muted: #4a5f58; /* 6.9:1 on --bg */
+  --text-inverse: #f7f4ee;
+
+  /* Actions */
+  --primary: #2f5d50; /* 6.8:1 on --bg */
+  --primary-hover: #264d42;
+  --primary-contrast: #f7f4ee;
+
+  /* Accents, fills only. None of these carry text at their own value. */
+  --accent-sage: #88a89b;
+  --accent-blue: #91aec4;
+  --accent-sand: #d7b995;
+  --accent-amber: #e7b976;
+
+  /*
+   * Reserved for a danger the USER reported. Never for a high activation score.
+   * Consumed by exactly one component; a test asserts nothing else references it.
+   */
+  --danger: #b34040; /* 5.1:1 on --bg */
+  --danger-contrast: #f7f4ee;
+
+  /* Lines */
+  --outline: #243833;
+  --border: #d5cec2;
+  --border-strong: #b9b0a1;
+
+  /* Focus, deliberately unmissable */
+  --focus-ring: #1c4b8a;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+
+  /* Radii */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-full: 999px;
+
+  /*
+   * Minimum target size. WCAG 2.2 requires 24px and its enhanced criterion uses
+   * 44px; 48 is deliberately forgiving for reduced concentration and unsteady
+   * hands.
+   */
+  --target-min: 48px;
+  --target-floor: 24px;
+
+  /* Type */
+  --font-body: 'Noto Naskh Arabic', 'SF Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 1.875rem;
+  --text-3xl: 2.25rem;
+  --leading-tight: 1.3;
+  --leading-normal: 1.6;
+  --leading-loose: 1.8;
+
+  /* Motion. Nothing here pulses, floats, or arrives unannounced. */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 400ms;
+  --ease: cubic-bezier(0.2, 0, 0.2, 1);
+
+  /* Elevation, kept nearly flat on purpose */
+  --shadow-sm: 0 1px 2px rgb(24 48 42 / 6%);
+  --shadow-md: 0 2px 8px rgb(24 48 42 / 8%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --bg: #141c1a;
+    --surface-1: #1e2a27;
+    --surface-calm: #1e2a27;
+    --surface-warm: #26332f;
+    --surface-sunken: #101715;
+
+    --text: #e8e4dc; /* 13.7:1 on --bg */
+    --text-muted: #a8b3ae; /* 7.4:1 on --bg */
+    --text-inverse: #141c1a;
+
+    --primary: #7fb3a2; /* 7.3:1 on --bg */
+    --primary-hover: #93c2b2;
+    --primary-contrast: #141c1a;
+
+    --accent-sage: #7f9d91;
+    --accent-blue: #8ba6bb;
+    --accent-sand: #b99b78;
+    --accent-amber: #c9a063;
+
+    --danger: #e08585; /* 6.5:1 on --bg */
+    --danger-contrast: #141c1a;
+
+    --outline: #c8d2ce;
+    --border: #3a4a45;
+    --border-strong: #52645e;
+
+    --focus-ring: #8fb8f0;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+    --shadow-md: 0 2px 8px rgb(0 0 0 / 35%);
+  }
+}
+
+/* Explicit override wins over the OS in both directions. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #141c1a;
+  --surface-1: #1e2a27;
+  --surface-calm: #1e2a27;
+  --surface-warm: #26332f;
+  --surface-sunken: #101715;
+
+  --text: #e8e4dc;
+  --text-muted: #a8b3ae;
+  --text-inverse: #141c1a;
+
+  --primary: #7fb3a2;
+  --primary-hover: #93c2b2;
+  --primary-contrast: #141c1a;
+
+  --accent-sage: #7f9d91;
+  --accent-blue: #8ba6bb;
+  --accent-sand: #b99b78;
+  --accent-amber: #c9a063;
+
+  --danger: #e08585;
+  --danger-contrast: #141c1a;
+
+  --outline: #c8d2ce;
+  --border: #3a4a45;
+  --border-strong: #52645e;
+
+  --focus-ring: #8fb8f0;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-md: 0 2px 8px rgb(0 0 0 / 35%);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+/*
+ * Discreet mode strips the palette back to something that reads as an ordinary
+ * timer, for use in public or at work. Accents collapse into the neutral
+ * surface; only text, border and the danger colour survive.
+ */
+:root[data-discreet='true'] {
+  --surface-calm: var(--surface-1);
+  --surface-warm: var(--surface-1);
+  --accent-sage: var(--border);
+  --accent-blue: var(--border);
+  --accent-sand: var(--border);
+  --accent-amber: var(--border);
+  --shadow-sm: none;
+  --shadow-md: none;
+}

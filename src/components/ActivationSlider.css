@@ -1,0 +1,85 @@
+.activation {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.activation__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.activation__heading label {
+  font-weight: 600;
+}
+
+.activation__heading output {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: var(--text-lg);
+}
+
+/*
+ * One neutral colour across the whole range. A gradient into red would tell the
+ * user that their own high number is an emergency.
+ */
+.activation__range {
+  inline-size: 100%;
+  block-size: var(--target-min);
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.activation__range::-webkit-slider-runnable-track {
+  block-size: 8px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    to var(--activation-direction, right),
+    var(--primary) var(--activation-progress, 50%),
+    var(--surface-sunken) var(--activation-progress, 50%)
+  );
+}
+
+.activation__range::-moz-range-track {
+  block-size: 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunken);
+}
+
+.activation__range::-moz-range-progress {
+  block-size: 8px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+}
+
+.activation__range::-webkit-slider-thumb {
+  appearance: none;
+  inline-size: 28px;
+  block-size: 28px;
+  margin-block-start: -10px;
+  border: 3px solid var(--bg);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+}
+
+.activation__range::-moz-range-thumb {
+  inline-size: 28px;
+  block-size: 28px;
+  border: 3px solid var(--bg);
+  border-radius: var(--radius-full);
+  background: var(--primary);
+}
+
+[dir='rtl'] .activation__range {
+  --activation-direction: left;
+}
+
+.activation__scale {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
