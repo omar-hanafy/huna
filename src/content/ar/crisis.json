@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "countries": [
+    {
+      "country": "EG",
+      "label": "مصر",
+      "generalGuidance": "لو كنت في خطر مباشر، أو ظهرت أفكار بإيذاء نفسك، أو شعرت أنك لا تستطيع الحفاظ على أمانك، تواصل فورًا مع أحد الأرقام التالية أو مع شخص تثق به، ولا تبقَ وحدك.",
+      "resources": [
+        {
+          "label": "الإسعاف",
+          "number": "123",
+          "note": "للحالات الطبية الطارئة.",
+          "source": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+          "lastVerified": "2026-08-17"
+        },
+        {
+          "label": "الشرطة",
+          "number": "122",
+          "note": "عند وجود خطر مباشر أو تهديد. الرقم الموحّد 112 يعمل كذلك من المحمول.",
+          "source": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+          "lastVerified": "2026-08-17"
+        },
+        {
+          "label": "الخط الساخن للصحة النفسية - من الأرضي",
+          "number": "08008880700",
+          "note": "الأمانة العامة للصحة النفسية وعلاج الإدمان، وزارة الصحة. مجاني من الخطوط الأرضية.",
+          "source": "https://english.ahram.org.eg/NewsContent/1/64/366341/Egypt/Politics-/Egypt-sets-up-hotlines-for-psychological-support-d.aspx",
+          "lastVerified": "2026-08-17"
+        },
+        {
+          "label": "الخط الساخن للصحة النفسية - من المحمول",
+          "number": "0220816831",
+          "note": "نفس الخدمة، للاتصال من الهاتف المحمول.",
+          "source": "https://english.ahram.org.eg/NewsContent/1/64/366341/Egypt/Politics-/Egypt-sets-up-hotlines-for-psychological-support-d.aspx",
+          "lastVerified": "2026-08-17"
+        }
+      ]
+    },
+    {
+      "country": "OTHER",
+      "label": "دولة أخرى",
+      "generalGuidance": "هذا التطبيق لا يعرف أرقام الطوارئ في بلدك، ولن يعرض رقمًا غير مؤكد. لو كنت في خطر مباشر، أو ظهرت أفكار بإيذاء نفسك، تواصل فورًا مع رقم الطوارئ المحلي في بلدك، أو اذهب لأقرب مستشفى، أو اتصل بشخص تثق به. لا تبقَ وحدك.",
+      "resources": []
+    }
+  ]
+}

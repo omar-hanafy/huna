@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "countries": [
+    {
+      "country": "EG",
+      "label": "Egypt",
+      "generalGuidance": "If you are in immediate danger, or thoughts of harming yourself appear, or you feel you cannot keep yourself safe, contact one of the numbers below or someone you trust right away, and do not stay alone.",
+      "resources": [
+        {
+          "label": "Ambulance",
+          "number": "123",
+          "note": "For medical emergencies.",
+          "source": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+          "lastVerified": "2026-08-17"
+        },
+        {
+          "label": "Police",
+          "number": "122",
+          "note": "When there is immediate danger or a threat. The unified number 112 also works from mobiles.",
+          "source": "https://en.wikipedia.org/wiki/List_of_emergency_telephone_numbers",
+          "lastVerified": "2026-08-17"
+        },
+        {
+          "label": "Mental health hotline, from a landline",
+          "number": "08008880700",
+          "note": "General Secretariat of Mental Health and Addiction Treatment, Ministry of Health. Free from landlines.",
+          "source": "https://english.ahram.org.eg/NewsContent/1/64/366341/Egypt/Politics-/Egypt-sets-up-hotlines-for-psychological-support-d.aspx",
+          "lastVerified": "2026-08-17"
+        },
+        {
+          "label": "Mental health hotline, from a mobile",
+          "number": "0220816831",
+          "note": "The same service, for calls from a mobile phone.",
+          "source": "https://english.ahram.org.eg/NewsContent/1/64/366341/Egypt/Politics-/Egypt-sets-up-hotlines-for-psychological-support-d.aspx",
+          "lastVerified": "2026-08-17"
+        }
+      ]
+    },
+    {
+      "country": "OTHER",
+      "label": "Another country",
+      "generalGuidance": "This app does not know the emergency numbers where you are, and will not show an unverified number. If you are in immediate danger, or thoughts of harming yourself appear, contact your local emergency number, go to the nearest hospital, or call someone you trust. Do not stay alone.",
+      "resources": []
+    }
+  ]
+}

@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "sequences": [
+    {
+      "id": "scanning",
+      "title": "I'm watching people or exits",
+      "subtitle": "Your eyes keep sweeping the room for something not quite right.",
+      "steps": [
+        {
+          "id": "scanning-look-once",
+          "kind": "orient",
+          "seconds": 20,
+          "text": "Look around once, slowly.",
+          "hint": "You are not searching for danger. You are only learning where you are."
+        },
+        {
+          "id": "scanning-three-objects",
+          "kind": "sense",
+          "seconds": 25,
+          "text": "Name three neutral objects in front of you.",
+          "hint": "A colour, a shape, a piece of furniture. Ordinary things with no special meaning."
+        },
+        {
+          "id": "scanning-feet",
+          "kind": "body",
+          "seconds": 20,
+          "text": "Notice both feet on the floor, and press them down gently.",
+          "hint": "The ground is holding you right now."
+        },
+        {
+          "id": "scanning-release",
+          "kind": "body",
+          "seconds": 20,
+          "text": "Release your tongue, then your jaw, then your shoulders.",
+          "hint": "In that order. Do not force any muscle."
+        },
+        {
+          "id": "scanning-one-task",
+          "kind": "action",
+          "seconds": 20,
+          "text": "Pick one ordinary thing in front of you and rest your attention on it.",
+          "hint": "A book, a cup, a screen. Anything that needs no watching."
+        }
+      ]
+    },
+    {
+      "id": "startled",
+      "title": "A sound or movement startled me",
+      "subtitle": "Your body jumped before your mind knew what happened.",
+      "steps": [
+        {
+          "id": "startled-name-sound",
+          "kind": "sense",
+          "seconds": 20,
+          "text": "Name the sound you heard.",
+          "hint": "A door, a car, something dropped. Even if unsure, name the closest guess."
+        },
+        {
+          "id": "startled-place-date",
+          "kind": "orient",
+          "seconds": 20,
+          "text": "Say to yourself: I am in ... and today is ...",
+          "hint": "Out loud if you can."
+        },
+        {
+          "id": "startled-present-signs",
+          "kind": "orient",
+          "seconds": 25,
+          "text": "Notice three signs that you are in the present, not in a memory.",
+          "hint": "The light, the sounds, your clothes, the device in your hand."
+        },
+        {
+          "id": "startled-exhale",
+          "kind": "breath",
+          "seconds": 30,
+          "text": "Five breaths, with the out-breath slightly longer than the in-breath.",
+          "hint": "Light breaths. Do not hold, and do not force your chest full.",
+          "substitute": {
+            "id": "startled-exhale-alt",
+            "kind": "body",
+            "seconds": 30,
+            "text": "Press your palms together five times, slowly.",
+            "hint": "A gentle squeeze, then a longer release."
+          }
+        },
+        {
+          "id": "startled-resume",
+          "kind": "action",
+          "seconds": 20,
+          "text": "Return to a small part of what you were doing before the sound.",
+          "hint": "One part. Not all of it."
+        }
+      ]
+    },
+    {
+      "id": "activated",
+      "title": "My body feels activated",
+      "subtitle": "Your heart, your chest, or tension through the muscles.",
+      "steps": [
+        {
+          "id": "activated-feet",
+          "kind": "body",
+          "seconds": 20,
+          "text": "Feet on the floor, and press down.",
+          "hint": "Notice the pressure. Do not analyse it."
+        },
+        {
+          "id": "activated-shoulders",
+          "kind": "body",
+          "seconds": 20,
+          "text": "Drop your shoulders away from your ears, and release your jaw.",
+          "hint": "Skip any area that hurts."
+        },
+        {
+          "id": "activated-move",
+          "kind": "move",
+          "seconds": 30,
+          "text": "Move slowly: stand, take a few steps, or stretch your arms.",
+          "hint": "Movement discharges activation faster than stillness."
+        },
+        {
+          "id": "activated-exhale",
+          "kind": "breath",
+          "seconds": 30,
+          "text": "Calm breaths, with the out-breath longer than the in-breath.",
+          "hint": "If you feel lightheaded, return to normal breathing immediately.",
+          "substitute": {
+            "id": "activated-exhale-alt",
+            "kind": "move",
+            "seconds": 30,
+            "text": "Keep moving gently for another half minute.",
+            "hint": "A steady, slow rhythm."
+          }
+        },
+        {
+          "id": "activated-resume",
+          "kind": "action",
+          "seconds": 20,
+          "text": "Choose one small thing to return to now.",
+          "hint": "Activation often settles while you are doing something, not before."
+        }
+      ]
+    },
+    {
+      "id": "detached",
+      "title": "I feel detached, or things seem unreal",
+      "subtitle": "As if watching yourself from a distance, or the room looks strange.",
+      "steps": [
+        {
+          "id": "detached-eyes-open",
+          "kind": "orient",
+          "seconds": 15,
+          "text": "Keep your eyes open and lift your head a little.",
+          "hint": "Do not close your eyes in this state in particular."
+        },
+        {
+          "id": "detached-say-aloud",
+          "kind": "orient",
+          "seconds": 25,
+          "text": "Say out loud: the place, the date, and roughly the time.",
+          "hint": "The sound of your own voice is part of the grounding."
+        },
+        {
+          "id": "detached-press-feet",
+          "kind": "body",
+          "seconds": 20,
+          "text": "Press your feet into the floor with moderate force, then release.",
+          "hint": "Repeat two or three times."
+        },
+        {
+          "id": "detached-texture",
+          "kind": "sense",
+          "seconds": 30,
+          "text": "Hold something with a clear texture and describe how it feels.",
+          "hint": "A key, fabric, a cold cup. Putting it into words matters."
+        },
+        {
+          "id": "detached-move",
+          "kind": "move",
+          "seconds": 25,
+          "text": "Make one short, slow movement: stand, or take two steps.",
+          "hint": "Movement outward, not meditation inward."
+        }
+      ]
+    },
+    {
+      "id": "predicting",
+      "title": "My thoughts are predicting danger",
+      "subtitle": "Your mind is building a scenario of what might happen.",
+      "steps": [
+        {
+          "id": "predicting-notice",
+          "kind": "thought",
+          "seconds": 25,
+          "text": "Say: I notice my mind is predicting that ...",
+          "hint": "Notice the thought. Do not argue with it."
+        },
+        {
+          "id": "predicting-evidence",
+          "kind": "thought",
+          "seconds": 30,
+          "text": "What evidence exists right now? And what suggests this is a false alarm?",
+          "hint": "Both together. You are not in a courtroom."
+        },
+        {
+          "id": "predicting-now",
+          "kind": "thought",
+          "seconds": 20,
+          "text": "Ask: is there something to act on now, or do I need to let the wave pass?",
+          "hint": "A prediction is not evidence by itself."
+        },
+        {
+          "id": "predicting-feet",
+          "kind": "body",
+          "seconds": 15,
+          "text": "Feet on the floor, jaw released.",
+          "hint": "Return to the body before deciding."
+        },
+        {
+          "id": "predicting-action",
+          "kind": "action",
+          "seconds": 20,
+          "text": "Choose one small action to return to.",
+          "hint": "Even if the thought is still there."
+        }
+      ]
+    },
+    {
+      "id": "sleepless",
+      "title": "I cannot settle down to sleep",
+      "subtitle": "Your body is tired but the alarm is still running.",
+      "steps": [
+        {
+          "id": "sleepless-light",
+          "kind": "action",
+          "seconds": 20,
+          "text": "Lower the light and move the screen away from your face.",
+          "hint": "You do not need complete darkness."
+        },
+        {
+          "id": "sleepless-no-clock",
+          "kind": "action",
+          "seconds": 20,
+          "text": "Decide not to look at the clock until morning.",
+          "hint": "Counting the hours left to sleep raises activation."
+        },
+        {
+          "id": "sleepless-release",
+          "kind": "body",
+          "seconds": 40,
+          "text": "Tense each muscle group for four seconds, then release for longer: face, shoulders, hands, legs.",
+          "hint": "Skip any painful area."
+        },
+        {
+          "id": "sleepless-exhale",
+          "kind": "breath",
+          "seconds": 40,
+          "text": "A calm out-breath, slightly longer, with no holding.",
+          "hint": "If focusing on the breath bothers you, the next step is enough on its own.",
+          "substitute": {
+            "id": "sleepless-exhale-alt",
+            "kind": "sense",
+            "seconds": 40,
+            "text": "Notice the weight of your body on the bed, point by point.",
+            "hint": "Head, shoulders, back, legs."
+          }
+        },
+        {
+          "id": "sleepless-allow",
+          "kind": "thought",
+          "seconds": 25,
+          "text": "Allow yourself to rest even if sleep has not come yet.",
+          "hint": "Rest has value on its own. Sleep arrives more easily once we stop chasing it."
+        }
+      ]
+    },
+    {
+      "id": "unsure",
+      "title": "I don't know, I just feel on edge",
+      "subtitle": "You do not have to name the feeling in order to work with it.",
+      "steps": [
+        {
+          "id": "unsure-look-once",
+          "kind": "orient",
+          "seconds": 20,
+          "text": "Look around once, slowly.",
+          "hint": "Once is enough."
+        },
+        {
+          "id": "unsure-place-date",
+          "kind": "orient",
+          "seconds": 20,
+          "text": "Say to yourself: I am in ... and today is ...",
+          "hint": "The place and the date."
+        },
+        {
+          "id": "unsure-feet",
+          "kind": "body",
+          "seconds": 20,
+          "text": "Feet on the floor, shoulders down, jaw released.",
+          "hint": "Three points, in order."
+        },
+        {
+          "id": "unsure-three-things",
+          "kind": "sense",
+          "seconds": 25,
+          "text": "Name three things you can see and two you can hear.",
+          "hint": "Anything that is actually there."
+        },
+        {
+          "id": "unsure-action",
+          "kind": "action",
+          "seconds": 20,
+          "text": "Choose one small step to return to now.",
+          "hint": "The goal is not for the feeling to disappear."
+        }
+      ]
+    }
+  ]
+}

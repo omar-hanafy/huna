@@ -1,0 +1,321 @@
+{
+  "app": {
+    "name": "Huna",
+    "tagline": "Check once. Ground. Choose. Return.",
+    "disclaimer": "A self-help tool, not a substitute for professional diagnosis or treatment.",
+    "privacyNote": "Your data stays on this device."
+  },
+  "common": {
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "done": "Done",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "close": "Close",
+    "edit": "Edit",
+    "add": "Add",
+    "exit": "Exit",
+    "notNow": "Not now",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "stepOf": "Step {{current}} of {{total}}",
+    "optional": "Optional",
+    "noData": "Nothing recorded yet."
+  },
+  "nav": {
+    "home": "Home",
+    "today": "Today",
+    "program": "Program",
+    "tools": "Tools",
+    "journal": "Journal",
+    "ladder": "Life ladder",
+    "card": "My card",
+    "progress": "Progress",
+    "settings": "Settings"
+  },
+  "home": {
+    "alertButton": "I'm on alert",
+    "alertHint": "Start here if your alarm is high right now.",
+    "practise": "Practise a tool",
+    "todayStep": "Today's small step",
+    "openCard": "Open my card",
+    "weekChip": "Week {{week}}",
+    "welcomeBack": "Welcome back. Choose the smallest useful step for today."
+  },
+  "alert": {
+    "safety": {
+      "question": "Is there a specific immediate danger right now, or has anything changed since you last checked?",
+      "yes": "Yes, there may be danger",
+      "no": "No specific immediate danger",
+      "unsure": "I'm not sure",
+      "helper": "Check once, honestly, then continue."
+    },
+    "danger": {
+      "title": "Your safety comes first right now",
+      "cannotKnow": "This app cannot determine whether you are safe. If you believe danger may be present, move toward a safer location or contact someone you trust.",
+      "steps": {
+        "moveAway": "Move away from the location if you can.",
+        "publicPlace": "Go toward a public place or one you trust.",
+        "contact": "Contact someone you trust.",
+        "safetyPlan": "Open your safety plan.",
+        "resources": "Emergency and support numbers."
+      },
+      "callLabel": "Call {{label}}",
+      "trustedContacts": "People I trust",
+      "noContacts": "No contacts added yet. You can add them in settings.",
+      "verifiedOn": "Number verified on {{date}}",
+      "backToGrounding": "I'm safe now, continue grounding"
+    },
+    "seal": {
+      "title": "You checked once",
+      "body": "Unless something in your surroundings has changed, you do not need to check again right now.",
+      "checkedAt": "Checked at {{time}}, {{minutes}} minutes ago.",
+      "nothingChanged": "Nothing changed, continue grounding",
+      "somethingChanged": "The situation changed, check again",
+      "neverBlocked": "The choice is always yours. This app cannot see what is happening around you."
+    },
+    "state": {
+      "question": "What feels strongest right now?",
+      "helper": "Pick the closest one. There is no wrong answer."
+    },
+    "sequence": {
+      "title": "Come back to the present",
+      "next": "Next step",
+      "finish": "I finished",
+      "tooMuch": "This isn't helping, try a different one",
+      "eyesOpen": "Keep your eyes open."
+    },
+    "action": {
+      "question": "What small thing do you want to return to now?",
+      "helper": "You do not have to be calm to continue.",
+      "options": {
+        "continueTask": "Continue what I was doing for two minutes",
+        "staySituation": "Stay in this safe situation for three more minutes",
+        "finishConversation": "Finish a small part of the conversation",
+        "walk": "Walk gently for two minutes",
+        "water": "Drink water and go back to work",
+        "contact": "Contact someone I trust",
+        "custom": "Something of my own",
+        "none": "Nothing right now"
+      },
+      "customPlaceholder": "Write the action you choose",
+      "startTimer": "Start a timer",
+      "timerRunning": "{{minutes}}:{{seconds}} left"
+    },
+    "done": {
+      "title": "You completed the exercise and chose your next action.",
+      "body": "Go back to your life now. You do not need to stay here.",
+      "exit": "Close the app"
+    },
+    "followUp": {
+      "title": "One quick question",
+      "body": "How are things after your last session?",
+      "activationAfter": "Activation now",
+      "completedAction": "Did you do the action you chose?",
+      "yes": "Yes",
+      "partly": "Partly",
+      "no": "No",
+      "whatHelped": "What helped most?",
+      "dismiss": "Not now"
+    },
+    "activationBefore": "Activation right now",
+    "activationScale": {
+      "low": "Relatively calm",
+      "high": "Very high"
+    }
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Huna",
+      "body": "A private companion for moments when your internal alarm is too sensitive. The goal is not to become calm, but to return to your life sooner."
+    },
+    "breathing": {
+      "question": "Does focusing on your breath help, or make things worse?",
+      "helps": "It helps",
+      "worsens": "It makes things worse",
+      "unsure": "I don't know yet",
+      "note": "If you choose 'makes things worse', every breathing step will be replaced with a tactile or movement step throughout the app."
+    },
+    "contacts": {
+      "title": "People you trust",
+      "helper": "Their numbers appear on the safety screen. Stored on this device only and never sent anywhere.",
+      "namePlaceholder": "Name",
+      "numberPlaceholder": "Number"
+    },
+    "country": {
+      "question": "Which country are you in?",
+      "helper": "So the right emergency numbers appear. We will not show an unverified number."
+    },
+    "metrics": {
+      "question": "Do you want to see numbers and statistics?",
+      "show": "Yes, show my progress",
+      "hide": "No, hide them",
+      "note": "If tracking numbers makes you monitor your body more, hide them. You can change this any time, and nothing is deleted."
+    },
+    "discreet": {
+      "question": "Do you often use this in public?",
+      "note": "Discreet mode makes the interface look like an ordinary timer, with no colours or illustrations."
+    },
+    "reducedMotion": {
+      "question": "Reduce motion",
+      "note": "Taken from your device settings. You can change it."
+    },
+    "boundary": {
+      "title": "Before we start",
+      "body": "Huna is a self-help tool. It does not diagnose, does not treat, and cannot know whether you are in danger. If symptoms persist or affect your sleep, work or relationships, seek an assessment from a qualified professional.",
+      "acknowledge": "Understood, begin"
+    }
+  },
+  "program": {
+    "title": "Four weeks, one small step a day",
+    "suggested": "Suggested for you now",
+    "override": "I'm on a different week",
+    "daily": "Daily",
+    "avoid": "Avoid",
+    "outcome": "The signal that matters",
+    "focusTask": "This week's focus"
+  },
+  "today": {
+    "title": "Today's routine",
+    "busyDay": "Busy day? Short version",
+    "busyDayOn": "You're on the short version",
+    "counter": "{{done}} of {{total}}",
+    "sleepHours": "Hours of sleep",
+    "recoveryMinutes": "Time to return after a wave",
+    "dayRating": "How the day felt overall",
+    "helpedToday": "What helped most today",
+    "autosaved": "Saved automatically on your device"
+  },
+  "tools": {
+    "title": "Tools for practice, not for emergencies",
+    "helper": "Use them in a calm moment so your body knows them before you need them.",
+    "breathing": "Breathing",
+    "grounding": "Senses",
+    "relaxation": "Muscles",
+    "breathingHidden": "The breathing tool is hidden based on your answer at setup. You can show it again in settings."
+  },
+  "journal": {
+    "title": "Trigger log",
+    "helper": "One situation a day is enough. This log is not an investigation.",
+    "trigger": "What happened before the alarm?",
+    "prediction": "What did your mind predict would happen?",
+    "evidenceDanger": "What evidence of real danger exists right now?",
+    "evidenceAlarm": "What suggests this may be a false alarm?",
+    "response": "What did you do, and did it help?",
+    "recoveryMinutes": "How long until your body settled somewhat?",
+    "intensityBefore": "Intensity before",
+    "intensityAfter": "Intensity after",
+    "empty": "No situations logged yet."
+  },
+  "safetyChecks": {
+    "title": "Check once",
+    "helper": "Record that you checked, so you do not need to check again.",
+    "logCheck": "Logged: {{target}}",
+    "targets": {
+      "door": "Door",
+      "phone": "Phone",
+      "exit": "Exit",
+      "windows": "Windows",
+      "custom": "Something else"
+    },
+    "lastCheck": "Last check: {{target}}, {{minutes}} minutes ago."
+  },
+  "ladder": {
+    "title": "Life ladder",
+    "helper": "Ordinary, safe activities you have been avoiding. Rank them 0 to 10 by expected tension.",
+    "addItem": "Add an activity",
+    "expectedActivation": "Expected tension",
+    "startSession": "Start the session",
+    "inSession": "You're in the activity",
+    "sudsPrompt": "Tension right now",
+    "sessionMinute": "Minute {{minute}}",
+    "completeSession": "I finished",
+    "curveTitle": "What actually happened",
+    "curveNote": "This is what you recorded. Sometimes tension falls, sometimes it does not. Both are useful information.",
+    "boundary": "This step is for ordinary, safe daily activities only. Do not use it to revisit painful memories or to face genuinely dangerous situations.",
+    "seekSupport": "If flashbacks, strong detachment, or ongoing danger are present, this step needs a professional alongside you, not an app alone.",
+    "empty": "No activities added yet."
+  },
+  "card": {
+    "title": "My card",
+    "helper": "Write it in a calm moment, to read in a hard one.",
+    "whatHappens": "What is happening",
+    "whatHelps": "What helps me",
+    "whatDoesNotHelp": "What does not help me",
+    "mySentence": "My sentence",
+    "myNextAction": "My next action",
+    "trustedPerson": "Someone I trust",
+    "professional": "Professional support",
+    "print": "Print",
+    "placeholders": {
+      "whatHappens": "For example: my alarm is high, but the alarm alone is not proof.",
+      "whatHelps": "For example: eyes open, feet on the floor, something with a clear texture.",
+      "whatDoesNotHelp": "For example: deep breathing, or scanning my body with attention.",
+      "mySentence": "For example: activation is a feeling, not proof.",
+      "myNextAction": "For example: stay two minutes and finish one task."
+    }
+  },
+  "progress": {
+    "title": "A kind look",
+    "helper": "These numbers are rough signals. One high day does not undo a whole direction of learning.",
+    "returnToLife": "Return-to-life rate",
+    "returnToLifeExplain": "The share of sessions after which you completed the action you chose within ten minutes.",
+    "tooEarly": "Too early for this number.",
+    "tooEarlyExplain": "It appears after five sessions with an answered follow-up, so it is not volatile.",
+    "medianRecovery": "Median time to return",
+    "repeatChecks": "Repeat checks",
+    "underTwoMinutes": "Sessions under two minutes",
+    "practisedThisWeek": "You practised {{count}} times this week. Which tool seemed most helpful?",
+    "chartTable": "Chart data table",
+    "weeklyQuestions": {
+      "title": "Three questions that matter more than the chart",
+      "one": "Am I noticing the alarm earlier than before?",
+      "two": "Do I return to what I was doing faster, or with less checking?",
+      "three": "Am I choosing actions that serve my life even while tense?"
+    },
+    "hidden": "Numbers are hidden by your choice. Your data is saved and nothing was deleted.",
+    "show": "Show the numbers"
+  },
+  "settings": {
+    "title": "Settings",
+    "experience": "Experience",
+    "safety": "Safety",
+    "data": "My data",
+    "language": "Language",
+    "theme": "Appearance",
+    "themeSystem": "Match device",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "reducedMotion": "Reduce motion",
+    "discreetMode": "Discreet mode",
+    "showMetrics": "Show numbers",
+    "breathingEnabled": "Show breathing steps",
+    "lockoutWindow": "Check reminder window",
+    "lockoutOff": "Off",
+    "lockoutMinutes": "{{minutes}} minutes",
+    "lockoutExplain": "If you open the check again within this window, we will remind you that you already checked. We will never block you.",
+    "export": "Export a backup",
+    "import": "Import a backup",
+    "reset": "Erase all data",
+    "resetConfirm": "Press again to confirm",
+    "importSuccess": "Backup imported successfully.",
+    "importFailure": "Could not read the file. Make sure it is a JSON backup exported from Huna.",
+    "resetDone": "Data reset to the beginning.",
+    "storageFull": "Could not save: browser storage is full. Export a backup, then clear old data.",
+    "storageUnavailable": "Storage is unavailable in this browser. What you write now may not be saved."
+  },
+  "boundary": {
+    "title": "Huna is a self-help tool, not a diagnosis or medical treatment",
+    "body": "Hypervigilance can appear with anxiety, chronic stress, trauma, sleep problems or other causes. If symptoms persist or affect work, sleep and relationships, seek an assessment from a qualified mental health or medical professional.",
+    "crisis": "If you are in immediate danger, or thoughts of harming yourself appear, or you cannot keep yourself safe, contact your local emergency services or someone you trust immediately, and do not stay alone."
+  },
+  "errors": {
+    "title": "Something failed to render",
+    "body": "Your data is still saved on your device and has not been lost.",
+    "export": "Export my data",
+    "reload": "Reload",
+    "technical": "Technical details"
+  }
+}

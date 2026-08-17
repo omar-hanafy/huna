@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "weeks": [
+    {
+      "number": 1,
+      "eyebrow": "Week one",
+      "title": "Quieting the alarm",
+      "description": "Build a short, predictable routine that sends safety signals to the body, without over-analysis or facing painful memories.",
+      "focusTask": "Log at the end of the day: activation, sleep, and one thing that helped.",
+      "outcome": "Shorter activation, and a faster return to your baseline.",
+      "accent": "sage",
+      "daily": [
+        "Two minutes of orienting to the present.",
+        "Five minutes of calm breathing, or its substitute if breathing does not suit you.",
+        "Twenty to thirty minutes of movement.",
+        "Three short alarm check-ins during the day.",
+        "Eight to ten minutes of muscle release in the evening."
+      ],
+      "avoid": [
+        "Do not try to analyse trauma or recall its details on your own.",
+        "Do not turn the measurement itself into a test you must pass."
+      ]
+    },
+    {
+      "number": 2,
+      "eyebrow": "Week two",
+      "title": "Understanding the triggers",
+      "description": "Separate immediate danger from elevated alarm, and notice one pattern a day rather than drowning in monitoring.",
+      "focusTask": "Write one trigger entry, and reduce one safety behaviour slightly.",
+      "outcome": "A clearer gap between the thought and the reality.",
+      "accent": "blue",
+      "daily": [
+        "Continue week one's routine.",
+        "Log one situation only: what happened, and what did your mind predict?",
+        "Write one piece of evidence for danger and one for a false alarm.",
+        "Pick one checking behaviour and reduce it gradually."
+      ],
+      "avoid": [
+        "Do not turn the log into rumination or a running investigation.",
+        "Do not reduce any safety measure that is genuinely necessary in a dangerous environment."
+      ]
+    },
+    {
+      "number": 3,
+      "eyebrow": "Week three",
+      "title": "Returning to life gradually",
+      "description": "Pick a safe activity you have been avoiding, and return to it with a small repeatable step rather than jumping to the hardest situation.",
+      "focusTask": "Do a safe activity rated 3 or 4 out of 10 for ten to twenty minutes.",
+      "outcome": "The body learns that anxiety can pass without escape.",
+      "accent": "sand",
+      "daily": [
+        "Continue the core routine.",
+        "Rank the avoided activities from 0 to 10.",
+        "Start with a moderately easy one and repeat it several times.",
+        "Allow some tension without seeking repeated reassurance."
+      ],
+      "avoid": [
+        "Do not carry out exposure to traumatic memories on your own.",
+        "Do not make the goal the complete disappearance of anxiety during the activity."
+      ]
+    },
+    {
+      "number": 4,
+      "eyebrow": "Week four",
+      "title": "Taking back the choice",
+      "description": "Begin the day with a value you want to serve, and take a small action even while part of the alarm remains.",
+      "focusTask": "Choose a value, then take one small step that serves it today.",
+      "outcome": "Life does not wait for anxiety to reach zero.",
+      "accent": "amber",
+      "daily": [
+        "Choose a value: health, learning, a relationship, independence, creativity or another.",
+        "Write an action that takes five to twenty minutes and serves that value.",
+        "Do it while allowing some tension to be present.",
+        "Compare your progress with week one, kindly."
+      ],
+      "avoid": [
+        "Do not use the comparison to punish yourself.",
+        "Do not treat a hard day as proof that all the progress is gone."
+      ]
+    }
+  ]
+}
