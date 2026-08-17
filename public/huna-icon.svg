@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="هنا">
+  <!--
+    The grounding mark: a centred dot inside one calm ring.
+    Deliberately not a warning symbol. Spec §15.5 - the icon communicates the
+    next step (grounding), not danger.
+  -->
+  <rect width="128" height="128" rx="30" fill="#F7F4EE" />
+  <circle cx="64" cy="64" r="40" fill="none" stroke="#2F5D50" stroke-width="5" />
+  <circle cx="64" cy="64" r="24" fill="none" stroke="#88A89B" stroke-width="3" stroke-opacity=".7" />
+  <circle cx="64" cy="64" r="9" fill="#2F5D50" />
+</svg>

@@ -1,0 +1,99 @@
+/*
+ * Self-contained on purpose: the recovery screen must render even if the main
+ * stylesheet or the token layer is what broke. Phase 3 tokenises the rest of
+ * the app but this file deliberately keeps literal values.
+ */
+.recovery-screen {
+  display: grid;
+  place-items: center;
+  min-block-size: 100dvh;
+  padding: 24px;
+  background: #f7f4ee;
+  color: #18302a;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
+.recovery-card {
+  max-inline-size: 34rem;
+  padding: 32px;
+  border-radius: 20px;
+  background: #dce8e2;
+  text-align: start;
+}
+
+.recovery-card h1 {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+}
+
+.recovery-card p {
+  margin: 0 0 24px;
+  line-height: 1.7;
+}
+
+.recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block-end: 24px;
+}
+
+.recovery-actions .button {
+  min-block-size: 48px;
+  padding-inline: 20px;
+  border: 0;
+  border-radius: 16px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.recovery-actions .button-primary {
+  background: #2f5d50;
+  color: #f7f4ee;
+}
+
+.recovery-actions .button-secondary {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px #2f5d50;
+  color: #18302a;
+}
+
+.recovery-details code {
+  display: block;
+  margin-block-start: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f7f4ee;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-color-scheme: dark) {
+  .recovery-screen {
+    background: #141c1a;
+    color: #e8e4dc;
+  }
+
+  .recovery-card {
+    background: #1e2a27;
+  }
+
+  .recovery-actions .button-primary {
+    background: #7fb3a2;
+    color: #141c1a;
+  }
+
+  .recovery-actions .button-secondary {
+    box-shadow: inset 0 0 0 2px #7fb3a2;
+    color: #e8e4dc;
+  }
+
+  .recovery-details code {
+    background: #141c1a;
+  }
+}
