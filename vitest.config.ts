@@ -1,8 +1,16 @@
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      // Only exists inside a Vite build; stubbed so UpdateNotice is testable
+      // rather than permanently uncovered.
+      'virtual:pwa-register/react': fileURLToPath(new URL('./src/test/pwaRegisterStub.ts', import.meta.url)),
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
@@ -16,7 +24,15 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/**/*.{test,spec}.{ts,tsx}', 'src/test/**', 'src/main.tsx', 'src/**/*.d.ts'],
+      exclude: [
+        'src/**/*.{test,spec}.{ts,tsx}',
+        'src/test/**',
+        'src/main.tsx',
+        // Both forms: '**' does not match zero directories in every matcher,
+        // and a declaration file makes the v8 remapper throw a parse error.
+        'src/*.d.ts',
+        'src/**/*.d.ts',
+      ],
       thresholds: {
         // The safety-critical layers carry the strict bars. UI coverage is
         // meaningful but not worth gaming a number over.

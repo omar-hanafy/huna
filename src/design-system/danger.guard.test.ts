@@ -16,6 +16,8 @@ const ALLOWED = [
   'src/components/DangerAction.css',
   'src/components/DangerAction.tsx',
   'src/design-system/danger.guard.test.ts',
+  // Verifies the token's contrast, so it necessarily names it.
+  'src/design-system/contrast.test.ts',
 ];
 
 /** Empty: the سَكينة stylesheet has been removed along with its view layer. */

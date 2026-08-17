@@ -25,7 +25,16 @@ export function SettingsRoute() {
   const [message, setMessage] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
 
+  /**
+   * Controls read from IndexedDB through a liveQuery, so a toggle would sit
+   * visibly still until the write round-tripped. This overlays the change
+   * immediately and drops each key once the stored value agrees with it, so the
+   * store stays the source of truth without the control feeling broken.
+   */
+  const [pending, setPending] = useState<Partial<Omit<UserPreferences, 'id'>>>({});
+
   const update = (patch: Partial<Omit<UserPreferences, 'id'>>) => {
+    setPending((current) => ({ ...current, ...patch }));
     void write((instance) => instance.savePreferences(patch));
   };
 
@@ -59,6 +68,13 @@ export function SettingsRoute() {
 
   if (!preferences) return <div className="screen" aria-busy="true" />;
 
+  // Entries the store has caught up with stop overriding, so a change made in
+  // another tab still shows through rather than being masked forever.
+  const unsettled = Object.fromEntries(
+    Object.entries(pending).filter(([key, value]) => preferences[key as keyof UserPreferences] !== value),
+  );
+  const shown: UserPreferences = { ...preferences, ...unsettled };
+
   return (
     <div className="screen settings">
       <h1>{t('settings.title')}</h1>
@@ -70,7 +86,7 @@ export function SettingsRoute() {
           <span className="field__label">{t('settings.language')}</span>
           <select
             className="select"
-            value={preferences.locale}
+            value={shown.locale}
             onChange={(event) => {
               const locale = event.target.value as UserPreferences['locale'];
               update({ locale });
@@ -86,7 +102,7 @@ export function SettingsRoute() {
           <span className="field__label">{t('settings.theme')}</span>
           <select
             className="select"
-            value={preferences.theme}
+            value={shown.theme}
             onChange={(event) => update({ theme: event.target.value as UserPreferences['theme'] })}
           >
             <option value="system">{t('settings.themeSystem')}</option>
@@ -98,7 +114,7 @@ export function SettingsRoute() {
         <label className="setting-row">
           <input
             type="checkbox"
-            checked={preferences.reducedMotion}
+            checked={shown.reducedMotion}
             onChange={(event) => update({ reducedMotion: event.target.checked })}
           />
           <span>{t('settings.reducedMotion')}</span>
@@ -107,7 +123,7 @@ export function SettingsRoute() {
         <label className="setting-row">
           <input
             type="checkbox"
-            checked={preferences.discreetMode}
+            checked={shown.discreetMode}
             onChange={(event) => update({ discreetMode: event.target.checked })}
           />
           <span>{t('settings.discreetMode')}</span>
@@ -116,7 +132,7 @@ export function SettingsRoute() {
         <label className="setting-row">
           <input
             type="checkbox"
-            checked={preferences.showMetrics}
+            checked={shown.showMetrics}
             onChange={(event) => update({ showMetrics: event.target.checked })}
           />
           <span>{t('settings.showMetrics')}</span>
@@ -131,7 +147,7 @@ export function SettingsRoute() {
         <label className="setting-row">
           <input
             type="checkbox"
-            checked={preferences.breathing !== 'worsens'}
+            checked={shown.breathing !== 'worsens'}
             onChange={(event) => update({ breathing: event.target.checked ? 'unsure' : 'worsens' })}
           />
           <span>{t('settings.breathingEnabled')}</span>
@@ -144,7 +160,7 @@ export function SettingsRoute() {
           <span className="field__label">{t('settings.lockoutWindow')}</span>
           <select
             className="select"
-            value={preferences.lockoutMinutes}
+            value={shown.lockoutMinutes}
             onChange={(event) =>
               update({ lockoutMinutes: Number(event.target.value) as UserPreferences['lockoutMinutes'] })
             }

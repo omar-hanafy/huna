@@ -9,6 +9,9 @@
     "noUnusedParameters": false
   },
   "include": [
+    // Ambient declarations, so tests that pull in app modules can resolve the
+    // same virtual module types the app project sees.
+    "src/vite-env.d.ts",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
     "src/**/*.spec.ts",

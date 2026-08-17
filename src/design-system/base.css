@@ -344,8 +344,8 @@ p {
 }
 
 .setting-row input[type='checkbox'] {
-  inline-size: 1.5rem;
-  block-size: 1.5rem;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
   accent-color: var(--primary);
   flex-shrink: 0;
 }
