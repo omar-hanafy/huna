@@ -4,6 +4,7 @@ import { NavLink, Outlet } from 'react-router';
 import { useDocumentChrome } from '../design-system/useDocumentChrome';
 import { usePreferences } from '../storage/hooks';
 import { useStorageContext } from '../storage/useStorage';
+import { FollowUpPrompt } from '../features/followUp/FollowUpPrompt';
 import { UpdateNotice } from './UpdateNotice';
 import './AppShell.css';
 
@@ -45,6 +46,8 @@ export function AppShell() {
       <main className="app-shell__main">
         <Outlet />
       </main>
+
+      <FollowUpPrompt />
 
       <nav className="tabbar" aria-label={t('nav.home')}>
         {ITEMS.map(({ to, key, Icon, end }) => (

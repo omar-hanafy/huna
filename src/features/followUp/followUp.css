@@ -1,0 +1,44 @@
+/*
+ * Presented as a sheet rather than a modal that blocks the app. Someone who
+ * opens the app to do something else should be able to get past this.
+ */
+.follow-up {
+  position: fixed;
+  inset-block-end: calc(4.5rem + env(safe-area-inset-bottom));
+  inset-inline: 0;
+  z-index: 20;
+  padding-inline: var(--space-4);
+}
+
+.follow-up__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  inline-size: min(100%, 34rem);
+  margin-inline: auto;
+  padding: var(--space-5);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.follow-up__inner h2 {
+  font-size: var(--text-lg);
+}
+
+.follow-up__answers {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.follow-up__answers .button {
+  flex: 1;
+  padding-inline: var(--space-3);
+}
+
+@media (min-width: 60rem) {
+  .follow-up {
+    inset-block-end: var(--space-5);
+  }
+}

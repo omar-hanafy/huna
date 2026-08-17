@@ -12,6 +12,7 @@ import {
 import { selectSequence } from '../../core/exercise-selector';
 import { lockoutState, type LockoutState } from '../../core/safety-window';
 import { createId } from '../../lib/id';
+import { useNow } from '../../lib/useNow';
 import { useLastSafetyCheck, usePreferences, useWrite } from '../../storage/hooks';
 import { useStorage } from '../../storage/useStorage';
 import type { AlertSession } from '../../storage/types';
@@ -53,6 +54,7 @@ export function AlertProvider({ children }: { children: ReactNode }) {
   const storage = useStorage();
   const write = useWrite();
   const { i18n } = useTranslation();
+  const now = useNow(60_000);
 
   const [state, setState] = useState<AlertFlowState>(() =>
     startAlertFlow({ sessionId: createId(), startedAt: new Date().toISOString(), lockoutActive: false }),
@@ -98,9 +100,9 @@ export function AlertProvider({ children }: { children: ReactNode }) {
   const lockout = useMemo(
     () =>
       preferences && lastCheck !== undefined
-        ? lockoutState(lastCheck, new Date(), preferences.lockoutMinutes)
+        ? lockoutState(lastCheck, now, preferences.lockoutMinutes)
         : EMPTY_LOCKOUT,
-    [preferences, lastCheck],
+    [preferences, lastCheck, now],
   );
 
   const locale: Locale = i18n.language === 'en' ? 'en' : 'ar';

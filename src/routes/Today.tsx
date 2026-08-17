@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Check } from 'lucide-react';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { ActivationSlider } from '../components/ActivationSlider';
 import { CONTENT, type Locale } from '../content';
@@ -7,8 +8,10 @@ import { activeWeek } from '../core/program';
 import { createId } from '../lib/id';
 import { formatDate } from '../lib/date';
 import { useToday } from '../lib/useToday';
+import { useNow } from '../lib/useNow';
 import { useDay, useDebouncedWrite, usePreferences, useWrite } from '../storage/hooks';
 import { CORE_TASK_IDS, createDayRecord, type CoreTaskId } from '../storage/types';
+import { ValueCommitmentCard } from '../features/values/ValueCommitmentCard';
 import './Today.css';
 
 const BUSY_DAY_TASKS: CoreTaskId[] = ['orientation', 'breathing', 'movement', 'checkins'];
@@ -26,11 +29,12 @@ export function Today() {
   const day = useDay(today);
   const write = useWrite();
   const { schedule } = useDebouncedWrite();
+  const now = useNow();
 
   const [checkInValue, setCheckInValue] = useState(5);
 
   const locale: Locale = i18n.language === 'en' ? 'en' : 'ar';
-  const week = preferences ? activeWeek(preferences, new Date()) : 1;
+  const week = preferences ? activeWeek(preferences, now) : 1;
   const weekContent = CONTENT[locale].program.weeks[week - 1];
   const record = day ?? createDayRecord(today, week);
   const breathingHidden = preferences?.breathing === 'worsens';
@@ -104,6 +108,19 @@ export function Today() {
           })}
         </ul>
       </section>
+
+      {/* The week's own practice, surfaced only when the program reaches it. */}
+      {week === 2 ? (
+        <Link className="button button--secondary" to="/journal">
+          {t('today.weekFeature.journal')}
+        </Link>
+      ) : null}
+      {week === 3 ? (
+        <Link className="button button--secondary" to="/ladder">
+          {t('today.weekFeature.ladder')}
+        </Link>
+      ) : null}
+      {week === 4 ? <ValueCommitmentCard date={today} /> : null}
 
       <section className="card card--calm stack">
         <h2>{t('today.checkInTitle')}</h2>

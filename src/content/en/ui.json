@@ -200,6 +200,10 @@
       "checkins": "3 alarm check-ins",
       "relaxation": "Muscle release, 8 to 10 minutes",
       "weekFocus": "This week's focus"
+    },
+    "weekFeature": {
+      "journal": "Open the trigger log",
+      "ladder": "Open the life ladder"
     }
   },
   "tools": {
@@ -280,7 +284,10 @@
       "windows": "Windows",
       "custom": "Something else"
     },
-    "lastCheck": "Last check: {{target}}, {{minutes}} minutes ago."
+    "lastCheck": "Last check: {{target}}, {{minutes}} minutes ago.",
+    "whatDidYouCheck": "What did you check?",
+    "letThePassPass": "Nothing changed, I will let the urge pass",
+    "realDanger": "If there is a genuine ongoing danger, do not train yourself to ignore it. Getting away and getting help come first."
   },
   "ladder": {
     "title": "Life ladder",
@@ -336,7 +343,8 @@
       "three": "Am I choosing actions that serve my life even while tense?"
     },
     "hidden": "Numbers are hidden by your choice. Your data is saved and nothing was deleted.",
-    "show": "Show the numbers"
+    "show": "Show the numbers",
+    "activationDrop": "Median activation drop"
   },
   "settings": {
     "title": "Settings",
@@ -377,5 +385,23 @@
     "export": "Export my data",
     "reload": "Reload",
     "technical": "Technical details"
+  },
+  "values": {
+    "title": "Today's value",
+    "helper": "Choose a value, then one small action that serves it. Do it while the tension is present, not after it goes.",
+    "pickValue": "Value",
+    "action": "The small action",
+    "actionPlaceholder": "For example: walk for 15 minutes",
+    "markDone": "I did it",
+    "done": "Done today",
+    "suggested": {
+      "health": "Health",
+      "learning": "Learning",
+      "relationship": "A relationship",
+      "work": "Work",
+      "independence": "Independence",
+      "creativity": "Creativity",
+      "faith": "Spirituality"
+    }
   }
 }

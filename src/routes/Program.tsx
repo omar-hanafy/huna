@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { CONTENT, type Locale } from '../content';
 import { activeWeek, isOverridden, suggestedWeek } from '../core/program';
+import { useNow } from '../lib/useNow';
 import { usePreferences, useWrite } from '../storage/hooks';
 import type { WeekNumber } from '../storage/types';
 import './Program.css';
@@ -16,10 +17,10 @@ export function Program() {
   const { t, i18n } = useTranslation();
   const preferences = usePreferences();
   const write = useWrite();
+  const now = useNow();
 
   const locale: Locale = i18n.language === 'en' ? 'en' : 'ar';
   const weeks = CONTENT[locale].program.weeks;
-  const now = new Date();
   const suggested = preferences ? suggestedWeek(preferences.programStartedAt, now) : 1;
   const current = preferences ? activeWeek(preferences, now) : 1;
   const overridden = preferences ? isOverridden(preferences) : false;

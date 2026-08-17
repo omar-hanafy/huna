@@ -1,9 +1,13 @@
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router';
 import { AlertRoute } from '../features/alert/AlertRoute';
+import { CheckOnce } from '../routes/CheckOnce';
 import { CopingCardRoute } from '../routes/CopingCardRoute';
 import { Home } from '../routes/Home';
+import { Journal } from '../routes/Journal';
+import { Ladder } from '../routes/Ladder';
 import { Onboarding } from '../routes/Onboarding';
 import { Program } from '../routes/Program';
+import { Progress } from '../routes/Progress';
 import { SettingsRoute } from '../routes/SettingsRoute';
 import { Today } from '../routes/Today';
 import { Tools } from '../routes/Tools';
@@ -33,6 +37,10 @@ export function App() {
             <Route path="/program" element={<Program />} />
             <Route path="/tools" element={<Tools />} />
             <Route path="/card" element={<CopingCardRoute />} />
+            <Route path="/check" element={<CheckOnce />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/ladder" element={<Ladder />} />
+            <Route path="/progress" element={<Progress />} />
             <Route path="/settings" element={<SettingsRoute />} />
           </Route>
         </Route>

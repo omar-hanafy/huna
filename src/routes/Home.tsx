@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { activeWeek } from '../core/program';
-import { toDateKey } from '../lib/date';
 import { useDay, usePreferences } from '../storage/hooks';
 import { useToday } from '../lib/useToday';
+import { useNow } from '../lib/useNow';
 import './Home.css';
 
 /**
@@ -19,8 +19,9 @@ export function Home() {
   const preferences = usePreferences();
   const today = useToday();
   const day = useDay(today);
+  const now = useNow();
 
-  const week = preferences ? activeWeek(preferences, new Date()) : 1;
+  const week = preferences ? activeWeek(preferences, now) : 1;
   const doneCount = day ? Object.values(day.tasks).filter(Boolean).length : 0;
 
   return (
@@ -62,12 +63,13 @@ export function Home() {
         <Link className="button button--quiet" to="/card">
           {t('home.openCard')}
         </Link>
+        <Link className="button button--quiet" to="/check">
+          {t('safetyChecks.title')}
+        </Link>
         <Link className="button button--quiet" to="/program">
           {t('nav.program')}
         </Link>
       </nav>
-
-      <p className="muted home-date">{toDateKey(new Date()) === today ? null : today}</p>
     </div>
   );
 }

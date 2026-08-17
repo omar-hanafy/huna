@@ -1,0 +1,72 @@
+.ladder-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ladder-item__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.ladder-item__head h3 {
+  font-size: var(--text-lg);
+}
+
+.ladder__checkpoints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.ladder__checkpoints .button {
+  flex: 1 1 5rem;
+  padding-inline: var(--space-3);
+}
+
+.ladder__checkpoints .button[aria-pressed='true'] {
+  background: var(--primary);
+  color: var(--primary-contrast);
+  box-shadow: none;
+}
+
+.habituation {
+  inline-size: 100%;
+  block-size: auto;
+  /* The chart is data, not decoration; it reads left to right in both scripts. */
+  direction: ltr;
+}
+
+.habituation__axis {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.habituation__line {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.data-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-2);
+  border-block-end: 1px solid var(--border);
+  text-align: center;
+}
+
+.data-table thead th {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}

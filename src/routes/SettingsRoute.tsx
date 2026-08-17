@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { DestructiveAction } from '../components/DangerAction';
 import { backupFilename, downloadJson } from '../lib/download';
 import { usePreferences, useWrite } from '../storage/hooks';
@@ -120,6 +121,12 @@ export function SettingsRoute() {
           />
           <span>{t('settings.showMetrics')}</span>
         </label>
+
+        {/* Deliberately not in the tab bar: numbers on the way to everything
+            else invite the monitoring this app is trying to reduce. */}
+        <Link className="button button--quiet" to="/progress">
+          {t('nav.progress')}
+        </Link>
 
         <label className="setting-row">
           <input
