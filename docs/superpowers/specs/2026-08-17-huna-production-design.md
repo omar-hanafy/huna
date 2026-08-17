@@ -1,7 +1,7 @@
 # هنا / Huna - Production Design Spec
 
 **Date:** 2026-08-17
-**Status:** Draft for review
+**Status:** Implemented and deployed at https://omar-hanafy.github.io/huna/
 **Supersedes:** `README.md` "أماكن مناسبة للتطوير", `PROJECT_ROADMAP.md`
 
 ---
@@ -757,9 +757,31 @@ block a private tool; all of them block a listed one.
 
 ---
 
-## 23. Open questions
+## 23. Resolved questions
 
-1. Countries beyond Egypt for crisis resources?
-2. Lockout window default: 15 minutes as proposed, or shorter?
-3. Does the working directory get renamed from `sakina-hypervigilance` to `huna` at
-   the end, or stay as is?
+1. **Crisis resources:** Egypt only. The country selector remains, so adding another
+   country is content rather than code.
+2. **Lockout window:** 15 minutes by default, with 5 / 10 / 30 also offered and an
+   off setting. Rationale in decision D1.
+3. **Directory:** renamed to `huna`.
+
+---
+
+## 24. What shipped
+
+All 22 defects in §18 are fixed and covered. The سَكينة view layer was deleted
+rather than migrated: `App.tsx`, `styles.css` (3,594 lines), `types.ts`,
+`utils.ts`, `usePersistentState` and thirteen view components are gone.
+
+Deferred as planned in §22, not dropped: guide character, clinician companion
+mode, accounts and cloud sync, recorded audio, wearable integration.
+
+Three findings came out of building it rather than out of this document, and are
+recorded in the decision log:
+
+- Reads that lazily wrote their defaults threw inside a Dexie liveQuery, so
+  `AppStorage.initialise()` is now explicit and getters are pure (D9).
+- Reading the clock during render left "you checked N minutes ago" frozen at the
+  last incidental re-render (D14).
+- The activation slider's fill grew from the wrong end in Arabic, because the
+  gradient was flipped for RTL on top of the browser's own flip.

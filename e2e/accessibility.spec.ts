@@ -35,17 +35,19 @@ test.describe('keyboard operation', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText('الفعل الصغير');
   });
 
-  test('gives a keyboard-focused control a visible focus ring', async ({ page }) => {
-    await page.goto('./#/alert');
-    // Tab rather than .focus(): :focus-visible only engages for keyboard focus,
-    // which is exactly the case this rule exists to serve.
-    await page.keyboard.press('Tab');
+  /**
+   * A focused text field always matches :focus-visible, in every engine, so
+   * this is the portable way to prove the ring is actually drawn.
+   */
+  test('draws a visible focus ring on a focused field', async ({ page }) => {
+    await page.goto('./#/journal');
+    await page.getByLabel('ماذا حدث قبل الاستنفار؟').focus();
 
     const outline = await page.evaluate(() => {
       const el = document.activeElement;
       if (!el) return null;
       const style = getComputedStyle(el);
-      return { width: style.outlineWidth, style: style.outlineStyle, tag: el.tagName };
+      return { width: style.outlineWidth, style: style.outlineStyle };
     });
 
     expect(outline).not.toBeNull();
@@ -53,7 +55,29 @@ test.describe('keyboard operation', () => {
     expect(Number.parseFloat(outline?.width ?? '0')).toBeGreaterThanOrEqual(2);
   });
 
-  test('reaches the alarm button by tabbing from the top of the page', async ({ page }) => {
+  /**
+   * WebKit only tabs between form fields unless full keyboard access is on, so
+   * the button case is checked where Tab reaches buttons by default.
+   */
+  test('draws a focus ring on a button reached by Tab', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'WebKit does not tab to buttons by default');
+    await page.goto('./#/alert');
+    await page.keyboard.press('Tab');
+
+    const outline = await page.evaluate(() => {
+      const el = document.activeElement;
+      if (!el || el.tagName === 'BODY') return null;
+      const style = getComputedStyle(el);
+      return { width: style.outlineWidth, style: style.outlineStyle };
+    });
+
+    expect(outline).not.toBeNull();
+    expect(outline?.style).not.toBe('none');
+    expect(Number.parseFloat(outline?.width ?? '0')).toBeGreaterThanOrEqual(2);
+  });
+
+  test('reaches the alarm button by tabbing from the top of the page', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'WebKit does not tab to links by default');
     await page.keyboard.press('Tab');
     const focused = await page.evaluate(() => document.activeElement?.textContent ?? '');
     expect(focused).toContain('أنا في حالة استنفار');

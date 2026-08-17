@@ -91,3 +91,45 @@ lookups in `TodayView` and `GroundingTool`.
 **Decision:** Keep it on and fix the call sites.
 **Why:** This codebase is full of keyed lookups (`days[date]`, `PLAN_WEEKS[week - 1]`). The flag
 turns a class of runtime crash into a compile error, which matters more here than convenience.
+
+## D12 - The سَكينة view layer was deleted, not migrated
+
+**Context:** The plan kept the old views working while the new ones were built.
+**Decision:** Delete `App.tsx`, `styles.css` (3,594 lines), `types.ts`, `utils.ts`,
+`usePersistentState` and all thirteen legacy view components once their replacements landed.
+**Why:** Keeping them would have meant maintaining two design systems and two data paths, and
+`styles.css` was the last consumer of the danger token outside `DangerAction`. Both
+self-cleaning guard tests fired on the deletion, which is what they were for.
+
+## D13 - Tab bar instead of a drawer
+
+**Context:** Defect 17 was a nav drawer with no focus trap and no Escape handling.
+**Decision:** Replace the drawer with a tab bar.
+**Why:** Removing the overlay removes the whole class of problem rather than patching two
+symptoms, and a tab bar is better for one-handed use, which is the actual usage posture here.
+
+## D14 - Time is never read during render
+
+**Context:** React's purity rule flagged one `Date.now()` in Progress.
+**Decision:** Introduce `useNow`, and route every render-time clock read through it.
+**Why:** The lint was the symptom. The real defect was that "you checked N minutes ago" and the
+follow-up window were frozen at whatever moment the component last happened to re-render.
+`useNow` also re-reads on focus, since a phone waking from sleep will not have run the interval.
+
+## D15 - Settings controls update optimistically
+
+**Context:** Controls read through a Dexie liveQuery, so a toggle sat still until the write
+round-tripped.
+**Decision:** Overlay the pending change during render, and let each key stop overriding once the
+stored value agrees with it.
+**Why:** A switch that does not move when pressed reads as broken. Deriving the overlay rather
+than clearing it in an effect avoids a cascading render, and lets a change made in another tab
+still show through instead of being masked.
+
+## D16 - WebKit keyboard tests are skipped, not weakened
+
+**Context:** Safari only tabs between form fields unless full keyboard access is enabled.
+**Decision:** Assert the focus ring on a text field in every engine, and check the button case on
+Chromium only, with an explicit skip reason.
+**Why:** Loosening the assertion to make it pass everywhere would have tested nothing. The skip
+records a real platform behaviour rather than hiding a gap.

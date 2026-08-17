@@ -514,6 +514,17 @@ Phases 1 and 2 have settled the storage and content shapes.
 
 ---
 
+## Status
+
+Phases 0 to 6 are complete and deployed at https://omar-hanafy.github.io/huna/.
+
+All 22 defects in the register are fixed and covered by tests. The سَكينة view
+layer has been deleted rather than migrated (see D12).
+
+Deferred deliberately, and recorded in the spec's out-of-scope section rather
+than dropped: a guide character, clinician companion mode, accounts and cloud
+sync, recorded audio guidance, and wearable integration.
+
 ## Progress log
 
 Decisions and deviations are appended to `docs/superpowers/plans/DECISIONS.md`
