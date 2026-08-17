@@ -65,6 +65,7 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit
 
+      # playwright.config.ts builds before serving, so no separate build step.
       - name: Run Playwright
         run: npm run e2e
 

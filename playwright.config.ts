@@ -26,7 +26,9 @@ export default defineConfig({
     { name: 'mobile-safari', use: { ...devices['iPhone 15'] } },
   ],
   webServer: {
-    command: `npm run preview -- --port ${PORT} --strictPort`,
+    // The build is part of the command rather than a separate CI step, so the
+    // suite can never run against a stale or missing dist.
+    command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
