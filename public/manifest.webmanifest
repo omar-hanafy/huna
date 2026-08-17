@@ -1,0 +1,19 @@
+{
+  "name": "سَكينة — رفيقك اليومي",
+  "short_name": "سَكينة",
+  "description": "خطة يومية مرنة وأدوات تفاعلية للتعامل مع الاستنفار واليقظة المفرطة.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/#/today",
+  "display": "standalone",
+  "background_color": "#f3f6f3",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "/sakina-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
