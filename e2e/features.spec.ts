@@ -13,7 +13,11 @@ test.describe('check once', () => {
     await page.goto('./#/check');
     await page.getByRole('button', { name: 'الباب' }).click();
 
-    // Re-entering inside the window surfaces the seal rather than a refusal.
+    // The seal appears as soon as the check is recorded, which is also how we
+    // know the write landed before reloading.
+    await expect(page.getByText(/آخر فحص/)).toBeVisible();
+
+    // It survives a reload: the seal is stored, not held in component state.
     await page.reload();
     await expect(page.getByText(/آخر فحص/)).toBeVisible();
 

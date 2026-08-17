@@ -25,16 +25,27 @@ export function minutesSinceCheck(check: SafetyCheck, now: Date): number {
   return minutesBetween(new Date(check.at), now);
 }
 
+/**
+ * How far ahead of `now` a check may be stamped before it is treated as a bad
+ * timestamp rather than a fresh one.
+ *
+ * `now` arrives here as a value sampled on a tick, so a check recorded moments
+ * ago can legitimately carry a later timestamp than the snapshot it is compared
+ * against. Rejecting those hid the seal for up to a full tick immediately after
+ * the user checked, which is exactly when it needs to be on screen.
+ */
+export const CLOCK_SKEW_TOLERANCE_MINUTES = 5;
+
 export function lockoutState(lastCheck: SafetyCheck | null, now: Date, windowMinutes: number): LockoutState {
   if (!lastCheck) return { active: false, minutesAgo: null, lastCheck: null };
 
-  const elapsed = minutesSinceCheck(lastCheck, now);
+  const raw = minutesSinceCheck(lastCheck, now);
+  // Slightly ahead means "just now". Far ahead means a clock or timezone change,
+  // and stays inactive rather than becoming a permanent lockout.
+  const elapsed = raw < 0 && raw > -CLOCK_SKEW_TOLERANCE_MINUTES ? 0 : raw;
   const minutesAgo = Math.max(0, Math.floor(elapsed));
 
   // A zero window means the user turned the reminder off.
-  // A negative elapsed time means the stored check is in the future, which can
-  // happen after a clock or timezone change; treat it as not applicable rather
-  // than as a permanent lockout.
   const active = windowMinutes > 0 && elapsed >= 0 && elapsed < windowMinutes;
 
   return { active, minutesAgo, lastCheck };

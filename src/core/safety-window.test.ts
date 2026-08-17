@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { SafetyCheck } from '../storage/types';
-import { isWithinLockout, lockoutState, minutesSinceCheck } from './safety-window';
+import {
+  CLOCK_SKEW_TOLERANCE_MINUTES,
+  isWithinLockout,
+  lockoutState,
+  minutesSinceCheck,
+} from './safety-window';
 
 const NOW = new Date('2026-08-17T12:00:00.000Z');
 
@@ -53,13 +58,38 @@ describe('lockoutState', () => {
   });
 
   /**
-   * A stored check dated in the future can happen after a clock or timezone
-   * change. Treating it as active would lock the reminder on indefinitely.
+   * `now` is sampled on a tick, so a check recorded a second ago can be stamped
+   * after it. Rejecting that hid the seal for a whole tick immediately after the
+   * user checked, which is the moment it most needs to be visible.
    */
-  it('is inactive when the stored check is in the future', () => {
+  it('treats a check stamped slightly ahead as having just happened', () => {
+    const state = lockoutState(checkAt('2026-08-17T12:00:02.000Z'), NOW, 15);
+    expect(state.active).toBe(true);
+    expect(state.minutesAgo).toBe(0);
+  });
+
+  it('treats a check within the skew tolerance as just now', () => {
+    const justInside = new Date(NOW.getTime() + (CLOCK_SKEW_TOLERANCE_MINUTES - 0.1) * 60_000);
+    expect(lockoutState(checkAt(justInside.toISOString()), NOW, 15).active).toBe(true);
+  });
+
+  /**
+   * Far ahead is a clock or timezone change, not a fresh check. Treating that as
+   * active would leave the reminder stuck on indefinitely.
+   */
+  it('is inactive when the stored check is far in the future', () => {
     const state = lockoutState(checkAt('2026-08-17T13:00:00.000Z'), NOW, 15);
     expect(state.active).toBe(false);
     expect(state.minutesAgo).toBe(0);
+  });
+
+  it('is inactive exactly at the far edge of the skew tolerance', () => {
+    const atEdge = new Date(NOW.getTime() + CLOCK_SKEW_TOLERANCE_MINUTES * 60_000);
+    expect(lockoutState(checkAt(atEdge.toISOString()), NOW, 15).active).toBe(false);
+  });
+
+  it('still respects a disabled window for a just-recorded check', () => {
+    expect(lockoutState(checkAt('2026-08-17T12:00:02.000Z'), NOW, 0).active).toBe(false);
   });
 
   it('still reports how long ago the check was, even when inactive', () => {

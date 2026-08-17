@@ -133,3 +133,14 @@ still show through instead of being masked.
 Chromium only, with an explicit skip reason.
 **Why:** Loosening the assertion to make it pass everywhere would have tested nothing. The skip
 records a real platform behaviour rather than hiding a gap.
+
+## D17 - A check stamped slightly ahead of the render clock counts as just now
+
+**Context:** `useNow` samples the clock on a tick, so a check recorded a second ago can carry a
+timestamp later than the snapshot it is compared against. `lockoutState` rejected any check dated
+after `now`, so the seal stayed hidden for up to a full tick immediately after the user checked.
+**Decision:** Treat a check up to five minutes ahead as having just happened; beyond that, keep
+the original guard and stay inactive.
+**Why:** The guard was written for a clock or timezone change producing a wildly future
+timestamp, and that case still behaves as before. A check two seconds ahead is not that. Found by
+an e2e test that first looked flaky and turned out to be reporting a real gap.
