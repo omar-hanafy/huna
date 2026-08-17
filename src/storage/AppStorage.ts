@@ -25,6 +25,15 @@ import type {
  * `StorageUnavailableError`. Callers must not swallow those.
  */
 export interface AppStorage {
+  /**
+   * Writes the singleton records that need a first-run value. Idempotent.
+   *
+   * Reads must never write, because they run inside Dexie liveQuery
+   * subscriptions which reject readwrite transactions. Callers run this once at
+   * boot, before anything subscribes.
+   */
+  initialise(): Promise<void>;
+
   // Preferences and metadata
   getPreferences(): Promise<UserPreferences>;
   savePreferences(patch: Partial<Omit<UserPreferences, 'id'>>): Promise<UserPreferences>;

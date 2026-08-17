@@ -47,8 +47,53 @@ function alertSession(overrides: Partial<AlertSession> = {}): AlertSession {
   };
 }
 
+/**
+ * Reads run inside Dexie liveQuery subscriptions, which reject a readwrite
+ * transaction. A getter that lazily persisted its default therefore threw
+ * `ReadOnlyError` the moment a component subscribed to it. Initialisation is
+ * explicit instead, and these tests hold the separation in place.
+ */
+describe('reads never write', () => {
+  it('leaves the store untouched when the singleton getters are called', async () => {
+    await storage.getPreferences();
+    await storage.getMeta();
+    await storage.getCopingCard();
+
+    const bundle = await storage.exportAll();
+    expect(bundle.copingCard).toBeNull();
+    expect(bundle.days).toEqual([]);
+  });
+
+  it('returns usable defaults before initialise has run', async () => {
+    const preferences = await storage.getPreferences();
+    expect(preferences.locale).toBe('ar');
+    expect(preferences.lockoutMinutes).toBe(15);
+
+    const card = await storage.getCopingCard();
+    expect(card.whatDoesNotHelp).toBe('');
+  });
+});
+
+describe('initialise', () => {
+  it('persists the first-run singletons', async () => {
+    await storage.initialise();
+    const first = await storage.getPreferences();
+    const again = await storage.getPreferences();
+    expect(again.programStartedAt).toBe(first.programStartedAt);
+    expect((await storage.getMeta()).migratedFrom).toBeNull();
+  });
+
+  it('is idempotent and does not reset an existing record', async () => {
+    await storage.initialise();
+    await storage.savePreferences({ locale: 'en' });
+    await storage.initialise();
+    expect((await storage.getPreferences()).locale).toBe('en');
+  });
+});
+
 describe('preferences', () => {
-  it('returns defaults on first read and persists them', async () => {
+  it('returns defaults on first read and keeps them stable once initialised', async () => {
+    await storage.initialise();
     const preferences = await storage.getPreferences();
     expect(preferences.locale).toBe('ar');
     expect(preferences.lockoutMinutes).toBe(15);

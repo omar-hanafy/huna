@@ -23,7 +23,9 @@ export function StorageProvider({ children, storage, legacyBlob }: StorageProvid
     let cancelled = false;
     const blob = legacyBlob === undefined ? readLegacyBlob() : legacyBlob;
 
-    migrateFromSakinaV1(blob, instance)
+    instance
+      .initialise()
+      .then(() => migrateFromSakinaV1(blob, instance))
       .then((result) => {
         if (!cancelled) setMigration(result);
       })

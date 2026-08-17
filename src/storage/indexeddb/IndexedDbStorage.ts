@@ -40,13 +40,33 @@ export class IndexedDbStorage implements AppStorage {
 
   // -------------------------------------------------------------- preferences
 
+  /**
+   * Writes the singleton records that have no meaningful lazy default.
+   *
+   * Reads must never write: `useLive` runs them inside a Dexie liveQuery, which
+   * rejects a readwrite transaction. Initialisation is therefore explicit and
+   * idempotent, called once at boot.
+   */
+  async initialise(): Promise<void> {
+    await wrapStorageErrors(async () => {
+      if (!(await this.db.preferences.get(PREFERENCES_ID))) {
+        await this.db.preferences.put(createDefaultPreferences(this.clock.now()));
+      }
+      if (!(await this.db.meta.get(META_ID))) {
+        await this.db.meta.put({
+          id: META_ID,
+          schemaVersion: SCHEMA_VERSION,
+          createdAt: this.clock.now().toISOString(),
+          migratedFrom: null,
+        });
+      }
+    });
+  }
+
   async getPreferences(): Promise<UserPreferences> {
     return wrapStorageErrors(async () => {
       const existing = await this.db.preferences.get(PREFERENCES_ID);
-      if (existing) return existing;
-      const defaults = createDefaultPreferences(this.clock.now());
-      await this.db.preferences.put(defaults);
-      return defaults;
+      return existing ?? createDefaultPreferences(this.clock.now());
     });
   }
 
@@ -62,15 +82,14 @@ export class IndexedDbStorage implements AppStorage {
   async getMeta(): Promise<Meta> {
     return wrapStorageErrors(async () => {
       const existing = await this.db.meta.get(META_ID);
-      if (existing) return existing;
-      const fresh: Meta = {
-        id: META_ID,
-        schemaVersion: SCHEMA_VERSION,
-        createdAt: this.clock.now().toISOString(),
-        migratedFrom: null,
-      };
-      await this.db.meta.put(fresh);
-      return fresh;
+      return (
+        existing ?? {
+          id: META_ID,
+          schemaVersion: SCHEMA_VERSION,
+          createdAt: this.clock.now().toISOString(),
+          migratedFrom: null,
+        }
+      );
     });
   }
 
@@ -230,10 +249,7 @@ export class IndexedDbStorage implements AppStorage {
   async getCopingCard(): Promise<CopingCard> {
     return wrapStorageErrors(async () => {
       const existing = await this.db.copingCard.get(COPING_CARD_ID);
-      if (existing) return existing;
-      const fresh = createEmptyCopingCard(this.clock.now());
-      await this.db.copingCard.put(fresh);
-      return fresh;
+      return existing ?? createEmptyCopingCard(this.clock.now());
     });
   }
 
