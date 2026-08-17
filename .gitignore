@@ -1,4 +1,22 @@
 node_modules
 dist
+dist-ssr
 .DS_Store
 *.local
+
+# test artifacts
+coverage
+playwright-report
+test-results
+blob-report
+.playwright
+
+# env
+.env
+.env.*
+!.env.example
+
+# editors
+.vscode/*
+!.vscode/extensions.json
+.idea
