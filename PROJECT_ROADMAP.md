@@ -1,6 +1,6 @@
-# Sakina — Suggested Product Roadmap
+# Sakina - Suggested Product Roadmap
 
-## Phase 1 — Local-first MVP
+## Phase 1 - Local-first MVP
 
 - Keep all records on-device.
 - Add IndexedDB and schema migrations.
@@ -8,7 +8,7 @@
 - Add unit tests for statistics, streaks, and migrations.
 - Add E2E coverage for the three interactive exercises.
 
-## Phase 2 — Personalization
+## Phase 2 - Personalization
 
 - Custom routines and exercise durations.
 - User-defined values and graded activity ladder.
@@ -16,7 +16,7 @@
 - Weekly reflection generated from deterministic rules, not medical diagnosis.
 - Arabic and English i18n dictionaries.
 
-## Phase 3 — Consent-based sync
+## Phase 3 - Consent-based sync
 
 - End-to-end encrypted sync.
 - Passkey or privacy-preserving authentication.
@@ -24,7 +24,7 @@
 - Explicit opt-in sharing with a therapist or coach.
 - Audit log showing when data was viewed or changed.
 
-## Phase 4 — Professional companion mode
+## Phase 4 - Professional companion mode
 
 - Therapist-created plans with user approval.
 - Session notes kept separate from self-tracking records.

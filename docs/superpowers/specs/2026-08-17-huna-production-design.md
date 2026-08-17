@@ -1,4 +1,4 @@
-# هنا / Huna — Production Design Spec
+# هنا / Huna - Production Design Spec
 
 **Date:** 2026-08-17
 **Status:** Draft for review
@@ -64,7 +64,7 @@ change to the spec, not an implementation detail.
 
 **Name:** هنا (Huna). Meaning "here".
 
-The previous name سَكينة means *tranquility*, which promises calm. The product's
+The previous name سَكينة means _tranquility_, which promises calm. The product's
 entire thesis is that the user does not need to be calm in order to continue. هنا
 promises presence instead, which is what grounding actually is.
 
@@ -104,12 +104,12 @@ up-front analysis. See §21.
 Portability comes from architecture, not framework choice. Three separations, all
 framework-agnostic, carry over to a Swift app unchanged:
 
-| Layer | Portable? | Why |
-|---|---|---|
-| `src/content/**` versioned JSON | Yes, verbatim | Plain data, no code |
-| `src/core/**` pure logic | Yes, transliterate | No React, no DOM, no I/O |
-| `AppStorage` interface | Interface yes, impl no | Swift writes a new impl |
-| `src/components/**` | No | Expected throwaway |
+| Layer                           | Portable?              | Why                      |
+| ------------------------------- | ---------------------- | ------------------------ |
+| `src/content/**` versioned JSON | Yes, verbatim          | Plain data, no code      |
+| `src/core/**` pure logic        | Yes, transliterate     | No React, no DOM, no I/O |
+| `AppStorage` interface          | Interface yes, impl no | Swift writes a new impl  |
+| `src/components/**`             | No                     | Expected throwaway       |
 
 ---
 
@@ -123,25 +123,25 @@ beneath it, and nothing else competing for attention.
 Hash routing is retained. It is correct on GitHub Pages, needs no `404.html`
 rewrite hack, and survives the project base path.
 
-| Route | Screen | Notes |
-|---|---|---|
-| `#/` | Home | Alert button, today's routine, coping card link |
-| `#/alert` | Alert flow entry | Redirects to current step |
-| `#/alert/safety` | Safety check | Three-way |
-| `#/alert/danger` | Safety mode | Reached from "yes" or "not sure" |
-| `#/alert/state` | "ما أقوى شيء الآن؟" | Seven states |
-| `#/alert/sequence` | Grounding sequence | One instruction per screen |
-| `#/alert/action` | Return to Life | The second most important screen |
-| `#/alert/done` | Quiet completion | Exits |
-| `#/onboarding` | First run | Safety preferences |
-| `#/today` | Daily routine detail | |
-| `#/program` | Four-week program | Soft-gated |
-| `#/tools` | Practice tools | Non-crisis practice only |
-| `#/ladder` | Life Ladder | Graded activities |
-| `#/journal` | Trigger log | Week 2 |
-| `#/card` | Coping card | Offline, printable |
-| `#/progress` | Recovery report | Hidden from nav unless enabled |
-| `#/settings` | Settings, data, boundaries | |
+| Route              | Screen                     | Notes                                           |
+| ------------------ | -------------------------- | ----------------------------------------------- |
+| `#/`               | Home                       | Alert button, today's routine, coping card link |
+| `#/alert`          | Alert flow entry           | Redirects to current step                       |
+| `#/alert/safety`   | Safety check               | Three-way                                       |
+| `#/alert/danger`   | Safety mode                | Reached from "yes" or "not sure"                |
+| `#/alert/state`    | "ما أقوى شيء الآن؟"        | Seven states                                    |
+| `#/alert/sequence` | Grounding sequence         | One instruction per screen                      |
+| `#/alert/action`   | Return to Life             | The second most important screen                |
+| `#/alert/done`     | Quiet completion           | Exits                                           |
+| `#/onboarding`     | First run                  | Safety preferences                              |
+| `#/today`          | Daily routine detail       |                                                 |
+| `#/program`        | Four-week program          | Soft-gated                                      |
+| `#/tools`          | Practice tools             | Non-crisis practice only                        |
+| `#/ladder`         | Life Ladder                | Graded activities                               |
+| `#/journal`        | Trigger log                | Week 2                                          |
+| `#/card`           | Coping card                | Offline, printable                              |
+| `#/progress`       | Recovery report            | Hidden from nav unless enabled                  |
+| `#/settings`       | Settings, data, boundaries |                                                 |
 
 Alert sub-steps are real routes so that the back button behaves and a refresh
 mid-flow resumes rather than restarts. `#/alert` is the Back Tap / Shortcut target.
@@ -159,17 +159,17 @@ distress meter.
 The central intervention. Implemented as a deterministic state machine in
 `src/core/alert-flow.ts` with no React imports, fully unit-tested.
 
-### 6.1 Step 1 — Safety check (three-way)
+### 6.1 Step 1 - Safety check (three-way)
 
 > هل يوجد خطر مباشر ومحدد الآن، أو تغيّر شيء منذ آخر مرة تحقّقت فيها؟
 
 Three large, plainly styled choices. No illustration on this screen.
 
-| Answer | Route |
-|---|---|
-| نعم، قد يكون هناك خطر | Safety mode |
-| لا يوجد خطر مباشر محدد | Continue to §6.2 |
-| لست متأكدًا | Safety mode, softer copy |
+| Answer                 | Route                    |
+| ---------------------- | ------------------------ |
+| نعم، قد يكون هناك خطر  | Safety mode              |
+| لا يوجد خطر مباشر محدد | Continue to §6.2         |
+| لست متأكدًا            | Safety mode, softer copy |
 
 **Safety mode** offers, without auto-dialing anything:
 
@@ -187,7 +187,7 @@ Three large, plainly styled choices. No illustration on this screen.
 The app must never render a string asserting safety. This is enforced by a test
 that scans content JSON for a denylist of assertions.
 
-### 6.2 Step 2 — The seal
+### 6.2 Step 2 - The seal
 
 On answering "no", a `SafetyCheck` record is written with a timestamp, and:
 
@@ -201,34 +201,34 @@ disabled) shows the seal with its timestamp and two honest choices:
 
 Never blocked. The app cannot know which is true, so it must not decide.
 
-### 6.3 Step 3 — Route by state, not by tool
+### 6.3 Step 3 - Route by state, not by tool
 
 > ما أقوى شيء تشعر به الآن؟
 
 Seven large cards:
 
-| id | Arabic | Sequence |
-|---|---|---|
-| `scanning` | أراقب الناس أو المخارج | Look once, name three neutral objects, feet, jaw, one task |
-| `startled` | صوت أو حركة أفزعتني | Name the sound, place and date, three present-signs, five long exhales |
-| `activated` | جسمي مستنفر | Feet, shoulders, jaw, slow movement, longer exhales |
-| `detached` | أشعر بانفصال أو أن المكان غير حقيقي | Eyes open, place/date/time aloud, press feet, textured object, slow movement. **No breath focus, no body scan** |
-| `predicting` | أفكاري تتوقع خطرًا | Notice-the-thought framing, evidence both ways, one small action |
-| `sleepless` | لا أستطيع أن أهدأ لأنام | Low light, muscle release, no clock checking, longer exhale if enabled |
-| `unsure` | لا أعرف، أشعر أنني على الحافة | Default orientation sequence |
+| id           | Arabic                              | Sequence                                                                                                        |
+| ------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `scanning`   | أراقب الناس أو المخارج              | Look once, name three neutral objects, feet, jaw, one task                                                      |
+| `startled`   | صوت أو حركة أفزعتني                 | Name the sound, place and date, three present-signs, five long exhales                                          |
+| `activated`  | جسمي مستنفر                         | Feet, shoulders, jaw, slow movement, longer exhales                                                             |
+| `detached`   | أشعر بانفصال أو أن المكان غير حقيقي | Eyes open, place/date/time aloud, press feet, textured object, slow movement. **No breath focus, no body scan** |
+| `predicting` | أفكاري تتوقع خطرًا                  | Notice-the-thought framing, evidence both ways, one small action                                                |
+| `sleepless`  | لا أستطيع أن أهدأ لأنام             | Low light, muscle release, no clock checking, longer exhale if enabled                                          |
+| `unsure`     | لا أعرف، أشعر أنني على الحافة       | Default orientation sequence                                                                                    |
 
 Sequences are content, not code. Selection logic lives in
 `src/core/exercise-selector.ts` and accounts for user preferences: if breathing is
 disabled, any breath step is substituted with its tactile or movement alternative,
 declared in the content file itself rather than chosen at runtime.
 
-### 6.4 Step 4 — The sequence
+### 6.4 Step 4 - The sequence
 
 One instruction per screen. Short imperative sentences. Large type. A plain
 "الخطوة 2 من 5" progress indicator. No decorative background, no character, no
 animation beyond a slow fade and a slowly filling progress line.
 
-### 6.5 Step 5 — Return to Life
+### 6.5 Step 5 - Return to Life
 
 > ما الفعل الصغير الذي تريد الرجوع إليه الآن؟
 
@@ -245,7 +245,7 @@ Preset options plus a custom field, and an optional timer:
 This is the screen that distinguishes the product. It is never skipped, though it
 can be answered with "لا شيء الآن".
 
-### 6.6 Step 6 — Quiet completion, then one follow-up
+### 6.6 Step 6 - Quiet completion, then one follow-up
 
 > أكملت التمرين، واخترت خطوتك التالية.
 
@@ -286,12 +286,12 @@ The existing `PLAN_WEEKS` content is retained and restructured into micro-action
 Weeks are **soft-gated**: the app suggests the week derived from `startedAt`, and
 one tap overrides it. Hard locking contradicts the agency principle and is rejected.
 
-| Week | Focus | Adds |
-|---|---|---|
-| 1 | Regulate the alarm | Orientation, optional breathing, movement, evening muscle release, sleep and activation log |
-| 2 | Understand the pattern | One journal entry daily, safety-behavior counter |
-| 3 | Return to activities | Life Ladder |
-| 4 | Values and choice | Daily five-minute value-linked action |
+| Week | Focus                  | Adds                                                                                        |
+| ---- | ---------------------- | ------------------------------------------------------------------------------------------- |
+| 1    | Regulate the alarm     | Orientation, optional breathing, movement, evening muscle release, sleep and activation log |
+| 2    | Understand the pattern | One journal entry daily, safety-behavior counter                                            |
+| 3    | Return to activities   | Life Ladder                                                                                 |
+| 4    | Values and choice      | Daily five-minute value-linked action                                                       |
 
 Journal language stays neutral. "توقّع عقلك أن يحدث..." never "فكرتك غير منطقية".
 
@@ -338,7 +338,7 @@ Hidden from navigation unless enabled. Fully disableable, including retroactivel
 
 **North star, shown to the user as such:**
 
-> **Return-to-Life Rate** — the share of alert sessions after which a chosen
+> **Return-to-Life Rate** - the share of alert sessions after which a chosen
 > everyday action was completed within ten minutes.
 
 Denominator is sessions whose follow-up (§6.6) was answered, not all sessions. A
@@ -352,10 +352,12 @@ completed under two minutes, ladder activities resumed, sleep, which tool helped
 which context.
 
 **Good insight, allowed:**
+
 > "الموجات كانت أقوى في الأيام التي نمت فيها أقل. التثبيت اللمسي ساعدك أكثر من
 > التنفس أثناء المواصلات. وسيط زمن العودة تغيّر من 18 دقيقة إلى 11."
 
 **Harmful insight, forbidden:**
+
 > "جهازك العصبي كان تحت ضغط شديد الساعة 3:42 مساءً."
 
 The first names a pattern and implies an action. The second invites body monitoring
@@ -400,9 +402,7 @@ Stored as content, per country, each entry carrying a `lastVerified` ISO date an
 {
   "country": "EG",
   "lastVerified": "2026-08-17",
-  "resources": [
-    { "label": "...", "number": "...", "source": "https://..." }
-  ]
+  "resources": [{ "label": "...", "number": "...", "source": "https://..." }],
 }
 ```
 
@@ -434,30 +434,30 @@ warm charcoal-green rather than black, which is harsh at 3am.
 
 **Light**
 
-| Token | Value | Contrast on bg |
-|---|---|---|
-| `--bg` | `#F7F4EE` | — |
-| `--text` | `#18302A` | 12.8:1 |
-| `--primary` | `#2F5D50` | 6.8:1 |
-| `--surface-calm` | `#DCE8E2` | — |
-| `--surface-warm` | `#E8DED4` | — |
-| `--accent-sage` | `#88A89B` | fill only |
-| `--accent-blue` | `#91AEC4` | fill only |
+| Token            | Value     | Contrast on bg                        |
+| ---------------- | --------- | ------------------------------------- |
+| `--bg`           | `#F7F4EE` | -                                     |
+| `--text`         | `#18302A` | 12.8:1                                |
+| `--primary`      | `#2F5D50` | 6.8:1                                 |
+| `--surface-calm` | `#DCE8E2` | -                                     |
+| `--surface-warm` | `#E8DED4` | -                                     |
+| `--accent-sage`  | `#88A89B` | fill only                             |
+| `--accent-blue`  | `#91AEC4` | fill only                             |
 | `--accent-amber` | `#E7B976` | 1.65:1, **fill only, dark text over** |
-| `--danger` | `#B34040` | 5.1:1 |
-| `--outline` | `#243833` | — |
+| `--danger`       | `#B34040` | 5.1:1                                 |
+| `--outline`      | `#243833` | -                                     |
 
 **Dark**
 
-| Token | Value | Contrast on bg |
-|---|---|---|
-| `--bg` | `#141C1A` | — |
-| `--text` | `#E8E4DC` | 13.7:1 |
-| `--primary` | `#7FB3A2` | 7.3:1 |
-| `--surface-1` | `#1E2A27` | — |
-| `--surface-2` | `#26332F` | — |
-| `--danger` | `#E08585` | 6.5:1 |
-| `--outline` | `#3A4A45` | — |
+| Token         | Value     | Contrast on bg |
+| ------------- | --------- | -------------- |
+| `--bg`        | `#141C1A` | -              |
+| `--text`      | `#E8E4DC` | 13.7:1         |
+| `--primary`   | `#7FB3A2` | 7.3:1          |
+| `--surface-1` | `#1E2A27` | -              |
+| `--surface-2` | `#26332F` | -              |
+| `--danger`    | `#E08585` | 6.5:1          |
+| `--outline`   | `#3A4A45` | -              |
 
 **Semantic rules:**
 
@@ -496,11 +496,11 @@ and the breathing orb becomes a numeric and linear indicator.
 
 Three levels, never mixed within a level.
 
-| Level | Use | Style | Source |
-|---|---|---|---|
-| 1 Functional | Nav, buttons, settings, safety actions | Rounded monoline, 24px, ~1.75px stroke, rounded caps and joins, no shadow | **Lucide** |
-| 2 Grounding-state | The seven state cards, exercises | Hand-drawn, 48-72px, one or two muted accents | **Waterlemon Jot** |
-| 3 Editorial | Onboarding, empty states, weekly reflection, education | Larger hand-drawn scenes | **Waterlemon Jot** |
+| Level             | Use                                                    | Style                                                                     | Source             |
+| ----------------- | ------------------------------------------------------ | ------------------------------------------------------------------------- | ------------------ |
+| 1 Functional      | Nav, buttons, settings, safety actions                 | Rounded monoline, 24px, ~1.75px stroke, rounded caps and joins, no shadow | **Lucide**         |
+| 2 Grounding-state | The seven state cards, exercises                       | Hand-drawn, 48-72px, one or two muted accents                             | **Waterlemon Jot** |
+| 3 Editorial       | Onboarding, empty states, weekly reflection, education | Larger hand-drawn scenes                                                  | **Waterlemon Jot** |
 
 Waterlemon "Ink" is explicitly **not** used for navigation. Its sample artwork is a
 3/4-perspective illustration with solid black masses that becomes an unreadable
@@ -522,7 +522,7 @@ detail, and no mixing of Jot with any other generated style.
 Sirens, flashing bells, warning triangles, red exclamation marks, radar sweeps,
 fast heartbeat graphics, eyes looking in all directions, countdown clocks.
 
-The **أنا في حالة استنفار** button carries a *grounding* symbol, not a warning one:
+The **أنا في حالة استنفار** button carries a _grounding_ symbol, not a warning one:
 two feet on the ground, or a centered dot within one calm ring. The label already
 communicates the state; the icon communicates the next step.
 
@@ -565,19 +565,19 @@ src/
 
 ### 16.1 Stack
 
-| Concern | Choice | Why |
-|---|---|---|
-| Framework | React 19 + TS + Vite | Existing, correct for a static PWA |
-| Routing | `react-router` HashRouter | Real routes for the alert flow, no server rewrites |
-| Ephemeral UI state | Zustand | Small, no boilerplate |
-| Persisted data | Dexie / IndexedDB via `useLiveQuery` | Reactivity plus cross-tab consistency free |
-| Validation | Zod | Content, import, and storage boundaries |
-| i18n | i18next + react-i18next | ar default, en parallel |
-| Icons | Lucide | Matches the level-1 spec exactly |
-| PWA | `vite-plugin-pwa` (Workbox) | Offline, correct base path |
-| Unit / component | Vitest + Testing Library | |
-| E2E | Playwright | |
-| Lint / format | ESLint + Prettier | |
+| Concern            | Choice                               | Why                                                |
+| ------------------ | ------------------------------------ | -------------------------------------------------- |
+| Framework          | React 19 + TS + Vite                 | Existing, correct for a static PWA                 |
+| Routing            | `react-router` HashRouter            | Real routes for the alert flow, no server rewrites |
+| Ephemeral UI state | Zustand                              | Small, no boilerplate                              |
+| Persisted data     | Dexie / IndexedDB via `useLiveQuery` | Reactivity plus cross-tab consistency free         |
+| Validation         | Zod                                  | Content, import, and storage boundaries            |
+| i18n               | i18next + react-i18next              | ar default, en parallel                            |
+| Icons              | Lucide                               | Matches the level-1 spec exactly                   |
+| PWA                | `vite-plugin-pwa` (Workbox)          | Offline, correct base path                         |
+| Unit / component   | Vitest + Testing Library             |                                                    |
+| E2E                | Playwright                           |                                                    |
+| Lint / format      | ESLint + Prettier                    |                                                    |
 
 ### 16.2 The storage interface
 
@@ -648,30 +648,30 @@ properties throughout so LTR is a `dir` flip rather than a second stylesheet.
 Every item below is a real defect found in the current code and must be fixed and
 covered by a test.
 
-| # | File | Defect |
-|---|---|---|
-| 1 | `package.json:12-22` | All deps `"latest"`, no lockfile, build not reproducible |
-| 2 | `package.json:12-18` | React/Vite/TS in `dependencies` not `devDependencies` |
-| 3 | — | No git repository |
-| 4 | `hooks/usePersistentState.ts:16-18` | Write errors silently swallowed. Quota or Safari private mode causes silent data loss while the UI claims "محفوظ تلقائيًا" |
-| 5 | `components/TodayView.tsx:50` | `crypto.randomUUID()` throws in non-secure contexts; `vite.config.ts` sets `host: true`, so LAN testing over http crashes every check-in |
-| 6 | `App.tsx:25` | `todayKey` computed at render; the day never rolls over past midnight in an open tab |
-| 7 | `components/BreathingTool.tsx:38` | 1000ms `setTimeout` chain drifts and stalls under background-tab throttling; a "10 cycle" session is not the stated duration |
-| 8 | `components/SettingsView.tsx:33` | Import validation is a shallow `version === 1` check; malformed data reaches render |
-| 9 | `hooks/usePersistentState.ts` | Two tabs clobber each other; last write wins |
-| 10 | `hooks/usePersistentState.ts:15` | Full-state `JSON.stringify` on every keystroke in the note textarea |
-| 11 | — | No error boundary; any render throw is a white screen over intact data |
-| 12 | `public/manifest.webmanifest` | Declares `standalone` with no service worker; no offline |
-| 13 | `public/manifest.webmanifest:12-18` | SVG-only icons; PWA install broken on iOS |
-| 14 | `vite.config.ts:11` | Production sourcemaps shipped |
-| 15 | `components/ProgressView.tsx:28-37` | Streak breaks to zero every morning before the first task |
-| 16 | `components/ProgressView.tsx:95` | Chart data only in `title` attributes; unavailable to screen readers |
-| 17 | `components/AppNav.tsx` | Drawer has no focus trap and no Escape-to-close |
-| 18 | `App.tsx:31-34` | Hash written in an effect on mount, adding a spurious history entry |
-| 19 | `components/SettingsView.tsx:76` | `reducedMotion` manual only; OS preference ignored |
-| 20 | `components/ProgressView.tsx:100` | Date parsed as `T12:00:00` here but locally elsewhere; inconsistent |
-| 21 | `components/SettingsView.tsx:26` | `URL.revokeObjectURL` called synchronously after `click()`; can cancel the download in some browsers |
-| 22 | — | Zero tests, no lint, no CI |
+| #   | File                                | Defect                                                                                                                                   |
+| --- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `package.json:12-22`                | All deps `"latest"`, no lockfile, build not reproducible                                                                                 |
+| 2   | `package.json:12-18`                | React/Vite/TS in `dependencies` not `devDependencies`                                                                                    |
+| 3   | -                                   | No git repository                                                                                                                        |
+| 4   | `hooks/usePersistentState.ts:16-18` | Write errors silently swallowed. Quota or Safari private mode causes silent data loss while the UI claims "محفوظ تلقائيًا"               |
+| 5   | `components/TodayView.tsx:50`       | `crypto.randomUUID()` throws in non-secure contexts; `vite.config.ts` sets `host: true`, so LAN testing over http crashes every check-in |
+| 6   | `App.tsx:25`                        | `todayKey` computed at render; the day never rolls over past midnight in an open tab                                                     |
+| 7   | `components/BreathingTool.tsx:38`   | 1000ms `setTimeout` chain drifts and stalls under background-tab throttling; a "10 cycle" session is not the stated duration             |
+| 8   | `components/SettingsView.tsx:33`    | Import validation is a shallow `version === 1` check; malformed data reaches render                                                      |
+| 9   | `hooks/usePersistentState.ts`       | Two tabs clobber each other; last write wins                                                                                             |
+| 10  | `hooks/usePersistentState.ts:15`    | Full-state `JSON.stringify` on every keystroke in the note textarea                                                                      |
+| 11  | -                                   | No error boundary; any render throw is a white screen over intact data                                                                   |
+| 12  | `public/manifest.webmanifest`       | Declares `standalone` with no service worker; no offline                                                                                 |
+| 13  | `public/manifest.webmanifest:12-18` | SVG-only icons; PWA install broken on iOS                                                                                                |
+| 14  | `vite.config.ts:11`                 | Production sourcemaps shipped                                                                                                            |
+| 15  | `components/ProgressView.tsx:28-37` | Streak breaks to zero every morning before the first task                                                                                |
+| 16  | `components/ProgressView.tsx:95`    | Chart data only in `title` attributes; unavailable to screen readers                                                                     |
+| 17  | `components/AppNav.tsx`             | Drawer has no focus trap and no Escape-to-close                                                                                          |
+| 18  | `App.tsx:31-34`                     | Hash written in an effect on mount, adding a spurious history entry                                                                      |
+| 19  | `components/SettingsView.tsx:76`    | `reducedMotion` manual only; OS preference ignored                                                                                       |
+| 20  | `components/ProgressView.tsx:100`   | Date parsed as `T12:00:00` here but locally elsewhere; inconsistent                                                                      |
+| 21  | `components/SettingsView.tsx:26`    | `URL.revokeObjectURL` called synchronously after `click()`; can cancel the download in some browsers                                     |
+| 22  | -                                   | Zero tests, no lint, no CI                                                                                                               |
 
 ---
 
@@ -691,7 +691,7 @@ covered by a test.
 
 ## 20. Testing strategy
 
-**Unit (`src/core`, `src/storage`, `src/content`) — the safety-critical layer:**
+**Unit (`src/core`, `src/storage`, `src/content`) - the safety-critical layer:**
 
 - `alert-flow` state machine: every transition, including refresh-mid-flow resume
 - `exercise-selector`: breathing-disabled substitution for all seven states
@@ -721,15 +721,15 @@ its own plan, written and approved separately**, so that scope is re-checked
 against reality six times rather than once. Each phase ends with a deployable app.
 The four-week program can start after Phase 2.
 
-| Phase | Contents | Ends with |
-|---|---|---|
-| **0 Foundation** | git, pinned deps + lockfile, ESLint/Prettier, Vitest/Playwright, CI, error boundary, defects 1-3, 14, 22 | Green CI on a reproducible build |
-| **1 Storage & content** | `AppStorage`, Dexie, migration, Zod, content model, i18n scaffolding, defects 4, 8, 9, 10 | Existing app on the new foundation, data intact |
-| **2 Alert flow** | `src/core`, the six alert screens, safety mode, seal and lockout, crisis resources, onboarding, defects 5, 6 | **The core intervention is usable. Start the four weeks.** |
-| **3 Design system** | Tokens, light and dark, Lucide, Jot illustrations, discreet mode, 48px targets, motion rules, defects 15-20 | Visual identity complete |
-| **4 PWA & deploy** | Service worker, icons, base path, Pages deploy, Back Tap shortcut docs, defects 12, 13 | Installed on the phone, works offline |
-| **5 Program features** | Life Ladder, coping card, journal rewrite, busy-day mode, values, progress and metrics | Feature-complete |
-| **6 Polish** | Accessibility audit, E2E coverage, README, performance | Production |
+| Phase                   | Contents                                                                                                     | Ends with                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| **0 Foundation**        | git, pinned deps + lockfile, ESLint/Prettier, Vitest/Playwright, CI, error boundary, defects 1-3, 14, 22     | Green CI on a reproducible build                           |
+| **1 Storage & content** | `AppStorage`, Dexie, migration, Zod, content model, i18n scaffolding, defects 4, 8, 9, 10                    | Existing app on the new foundation, data intact            |
+| **2 Alert flow**        | `src/core`, the six alert screens, safety mode, seal and lockout, crisis resources, onboarding, defects 5, 6 | **The core intervention is usable. Start the four weeks.** |
+| **3 Design system**     | Tokens, light and dark, Lucide, Jot illustrations, discreet mode, 48px targets, motion rules, defects 15-20  | Visual identity complete                                   |
+| **4 PWA & deploy**      | Service worker, icons, base path, Pages deploy, Back Tap shortcut docs, defects 12, 13                       | Installed on the phone, works offline                      |
+| **5 Program features**  | Life Ladder, coping card, journal rewrite, busy-day mode, values, progress and metrics                       | Feature-complete                                           |
+| **6 Polish**            | Accessibility audit, E2E coverage, README, performance                                                       | Production                                                 |
 
 **After four weeks of real use**, the native question gets answered with evidence:
 which sequences were actually opened, whether breathing helped or hurt, whether the

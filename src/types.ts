@@ -1,12 +1,6 @@
 export type WeekNumber = 1 | 2 | 3 | 4;
 
-export type CoreTaskId =
-  | 'orientation'
-  | 'breathing'
-  | 'movement'
-  | 'checkins'
-  | 'relaxation'
-  | 'weekFocus';
+export type CoreTaskId = 'orientation' | 'breathing' | 'movement' | 'checkins' | 'relaxation' | 'weekFocus';
 
 export type ViewId = 'today' | 'plan' | 'tools' | 'journal' | 'progress' | 'settings';
 

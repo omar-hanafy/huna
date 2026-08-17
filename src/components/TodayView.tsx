@@ -35,10 +35,11 @@ export function TodayView({
   const [checkInValue, setCheckInValue] = useState(5);
   const [checkInNote, setCheckInNote] = useState('');
   const [showProtocol, setShowProtocol] = useState(false);
-  const week = PLAN_WEEKS[activeWeek - 1];
+  const week = PLAN_WEEKS[activeWeek - 1] ?? PLAN_WEEKS[0]!;
   const completion = calculateCompletion(day);
-  const lineIndex = Math.abs(dateKey.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)) % SUPPORTIVE_LINES.length;
-  const todayLine = SUPPORTIVE_LINES[lineIndex];
+  const lineIndex =
+    Math.abs(dateKey.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)) % SUPPORTIVE_LINES.length;
+  const todayLine = SUPPORTIVE_LINES[lineIndex] ?? SUPPORTIVE_LINES[0];
 
   const checkInAverage = useMemo(() => {
     if (!day.checkIns.length) return null;
@@ -63,14 +64,22 @@ export function TodayView({
         <div className="hero-glow glow-two" />
         <div className="hero-copy">
           <span className="eyebrow hero-eyebrow">{formatArabicDate(dateKey)}</span>
-          <h1>مساحة صغيرة<br />ترجعك لنفسك.</h1>
+          <h1>
+            مساحة صغيرة
+            <br />
+            ترجعك لنفسك.
+          </h1>
           <p>{todayLine}</p>
           <div className="hero-actions">
             <button className="button button-light" type="button" onClick={() => onNavigate('tools')}>
               <Icon name="wind" size={18} />
               ابدأ تمرينًا الآن
             </button>
-            <button className="button button-glass" type="button" onClick={() => setShowProtocol((value) => !value)}>
+            <button
+              className="button button-glass"
+              type="button"
+              onClick={() => setShowProtocol((value) => !value)}
+            >
               <Icon name="shield" size={18} />
               موجة قوية؟
             </button>
@@ -88,23 +97,62 @@ export function TodayView({
       {showProtocol ? (
         <section className="protocol-panel">
           <div className="protocol-head">
-            <div className="protocol-icon"><Icon name="shield" /></div>
+            <div className="protocol-icon">
+              <Icon name="shield" />
+            </div>
             <div>
               <span className="eyebrow">بروتوكول 60–120 ثانية</span>
               <h3>تعامل مع الموجة، خطوة واحدة كل مرة</h3>
             </div>
-            <button className="icon-button" type="button" onClick={() => setShowProtocol(false)} aria-label="إغلاق">
+            <button
+              className="icon-button"
+              type="button"
+              onClick={() => setShowProtocol(false)}
+              aria-label="إغلاق"
+            >
               <Icon name="close" />
             </button>
           </div>
           <ol className="protocol-steps">
-            <li><span>1</span><div><strong>افحص الخطر مرة واحدة</strong><p>هل يوجد خطر مباشر يحتاج خروجًا أو مساعدة؟</p></div></li>
-            <li><span>2</span><div><strong>سمِّ ما يحدث</strong><p>“هذا استنفار مرتفع، وليس حكمًا نهائيًا على الواقع.”</p></div></li>
-            <li><span>3</span><div><strong>ثبّت جسمك</strong><p>قدماك على الأرض، كتفاك لأسفل، والفك مرتخٍ.</p></div></li>
-            <li><span>4</span><div><strong>ارجع للحاضر</strong><p>اسم المكان، التاريخ، وخمسة أشياء أمامك.</p></div></li>
-            <li><span>5</span><div><strong>نفّذ فعلًا واحدًا</strong><p>اشرب ماء، تحرك لدقيقتين، أو أكمل خطوة صغيرة.</p></div></li>
+            <li>
+              <span>1</span>
+              <div>
+                <strong>افحص الخطر مرة واحدة</strong>
+                <p>هل يوجد خطر مباشر يحتاج خروجًا أو مساعدة؟</p>
+              </div>
+            </li>
+            <li>
+              <span>2</span>
+              <div>
+                <strong>سمِّ ما يحدث</strong>
+                <p>“هذا استنفار مرتفع، وليس حكمًا نهائيًا على الواقع.”</p>
+              </div>
+            </li>
+            <li>
+              <span>3</span>
+              <div>
+                <strong>ثبّت جسمك</strong>
+                <p>قدماك على الأرض، كتفاك لأسفل، والفك مرتخٍ.</p>
+              </div>
+            </li>
+            <li>
+              <span>4</span>
+              <div>
+                <strong>ارجع للحاضر</strong>
+                <p>اسم المكان، التاريخ، وخمسة أشياء أمامك.</p>
+              </div>
+            </li>
+            <li>
+              <span>5</span>
+              <div>
+                <strong>نفّذ فعلًا واحدًا</strong>
+                <p>اشرب ماء، تحرك لدقيقتين، أو أكمل خطوة صغيرة.</p>
+              </div>
+            </li>
           </ol>
-          <div className="protocol-quote">قد أشعر بالخطر دون أن أكون في خطر. سأتحقق مرة واحدة ثم أرجع للحظة الحالية.</div>
+          <div className="protocol-quote">
+            قد أشعر بالخطر دون أن أكون في خطر. سأتحقق مرة واحدة ثم أرجع للحظة الحالية.
+          </div>
         </section>
       ) : null}
 
@@ -129,7 +177,9 @@ export function TodayView({
                 >
                   {done ? <Icon name="check" size={18} /> : null}
                 </button>
-                <div className="task-icon"><Icon name={task.icon as Parameters<typeof Icon>[0]['name']} /></div>
+                <div className="task-icon">
+                  <Icon name={task.icon as Parameters<typeof Icon>[0]['name']} />
+                </div>
                 <div className="task-copy">
                   <span>{task.duration}</span>
                   <h3>{task.title}</h3>
@@ -154,13 +204,19 @@ export function TodayView({
             >
               {day.tasks.weekFocus ? <Icon name="check" size={18} /> : null}
             </button>
-            <div className="task-icon"><Icon name="target" /></div>
+            <div className="task-icon">
+              <Icon name="target" />
+            </div>
             <div className="task-copy">
               <span>تركيز الأسبوع {activeWeek}</span>
               <h3>{week.title}</h3>
               <p>{week.focusTask}</p>
             </div>
-            <button className="task-link" type="button" onClick={() => onNavigate(activeWeek === 2 ? 'journal' : 'plan')}>
+            <button
+              className="task-link"
+              type="button"
+              onClick={() => onNavigate(activeWeek === 2 ? 'journal' : 'plan')}
+            >
               فتح التفاصيل
               <Icon name="arrow" size={15} />
             </button>
@@ -196,7 +252,10 @@ export function TodayView({
             onChange={(event) => setCheckInValue(Number(event.target.value))}
             style={{ '--range-progress': `${checkInValue * 10}%` } as CSSProperties}
           />
-          <div className="range-labels"><span>هادئ نسبيًا</span><span>مرتفع جدًا</span></div>
+          <div className="range-labels">
+            <span>هادئ نسبيًا</span>
+            <span>مرتفع جدًا</span>
+          </div>
 
           <input
             className="soft-input"
@@ -217,7 +276,7 @@ export function TodayView({
               </div>
               <div className="history-dots">
                 {day.checkIns.slice(-7).map((item) => (
-                  <div key={item.id} title={`${formatArabicTime(item.createdAt)} — ${item.vigilance}/10`}>
+                  <div key={item.id} title={`${formatArabicTime(item.createdAt)} - ${item.vigilance}/10`}>
                     <span style={{ height: `${Math.max(12, item.vigilance * 7)}%` }} />
                     <small>{item.vigilance}</small>
                   </div>
@@ -233,7 +292,9 @@ export function TodayView({
               <span className="eyebrow">نهاية اليوم</span>
               <h3>سجل بسيط بلا اجترار</h3>
             </div>
-            <div className="soft-icon"><Icon name="moon" /></div>
+            <div className="soft-icon">
+              <Icon name="moon" />
+            </div>
           </div>
 
           <div className="field-grid two-col">
@@ -246,7 +307,9 @@ export function TodayView({
                   max="24"
                   step="0.5"
                   value={day.sleepHours ?? ''}
-                  onChange={(event) => onUpdateDay({ sleepHours: event.target.value === '' ? null : Number(event.target.value) })}
+                  onChange={(event) =>
+                    onUpdateDay({ sleepHours: event.target.value === '' ? null : Number(event.target.value) })
+                  }
                   placeholder="7"
                 />
                 <small>ساعة</small>
@@ -260,7 +323,11 @@ export function TodayView({
                   min="0"
                   max="600"
                   value={day.recoveryMinutes ?? ''}
-                  onChange={(event) => onUpdateDay({ recoveryMinutes: event.target.value === '' ? null : Number(event.target.value) })}
+                  onChange={(event) =>
+                    onUpdateDay({
+                      recoveryMinutes: event.target.value === '' ? null : Number(event.target.value),
+                    })
+                  }
                   placeholder="15"
                 />
                 <small>دقيقة</small>
@@ -270,7 +337,10 @@ export function TodayView({
 
           <div className="slider-heading compact">
             <label htmlFor="daily-vigilance">تقييم اليوم إجمالًا</label>
-            <output>{day.vigilance ?? '—'}{day.vigilance !== null ? '/10' : ''}</output>
+            <output>
+              {day.vigilance ?? '-'}
+              {day.vigilance !== null ? '/10' : ''}
+            </output>
           </div>
           <input
             id="daily-vigilance"
@@ -293,7 +363,9 @@ export function TodayView({
               rows={3}
             />
           </label>
-          <div className="autosave-note"><span /> محفوظ تلقائيًا على جهازك</div>
+          <div className="autosave-note">
+            <span /> محفوظ تلقائيًا على جهازك
+          </div>
         </article>
       </section>
 
@@ -303,7 +375,10 @@ export function TodayView({
           <span className="eyebrow">المسار الحالي</span>
           <h2>{week.title}</h2>
           <p>{week.description}</p>
-          <div className="outcome-line"><Icon name="leaf" size={18} /><span>المؤشر المهم: {week.outcome}</span></div>
+          <div className="outcome-line">
+            <Icon name="leaf" size={18} />
+            <span>المؤشر المهم: {week.outcome}</span>
+          </div>
         </div>
         <button className="button button-secondary" type="button" onClick={() => onNavigate('plan')}>
           عرض خطة الأسابيع

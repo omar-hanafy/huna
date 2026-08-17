@@ -98,13 +98,15 @@ export function BreathingTool({ reducedMotion = false, onComplete }: BreathingTo
       : phase === 'exhale'
         ? 'زفير أطول'
         : phase === 'complete'
-          ? 'أحسنت — ارجع لتنفسك الطبيعي'
+          ? 'أحسنت - ارجع لتنفسك الطبيعي'
           : 'ابدأ عندما تكون جاهزًا';
 
   return (
     <section className="tool-card breathing-card">
       <div className="tool-card-head">
-        <div className="tool-title-icon"><Icon name="wind" /></div>
+        <div className="tool-title-icon">
+          <Icon name="wind" />
+        </div>
         <div>
           <span className="eyebrow">أداة فورية</span>
           <h3>التنفّس الهادئ</h3>
@@ -115,9 +117,11 @@ export function BreathingTool({ reducedMotion = false, onComplete }: BreathingTo
       <div className="breathing-stage">
         <div
           className={`breathing-orb phase-${phase} ${running ? 'is-running' : ''} ${reducedMotion ? 'reduced-motion' : ''}`}
-          style={{
-            '--phase-duration': `${phase === 'inhale' ? inhaleSeconds : exhaleSeconds}s`,
-          } as CSSProperties}
+          style={
+            {
+              '--phase-duration': `${phase === 'inhale' ? inhaleSeconds : exhaleSeconds}s`,
+            } as CSSProperties
+          }
         >
           <span className="breathing-halo halo-one" />
           <span className="breathing-halo halo-two" />
@@ -131,7 +135,10 @@ export function BreathingTool({ reducedMotion = false, onComplete }: BreathingTo
           <span style={{ width: `${progress}%` }} />
         </div>
         <div className="breathing-meta">
-          <span>الدورة {Math.min(completedCycles + (phase === 'complete' ? 0 : 1), targetCycles)} من {targetCycles}</span>
+          <span>
+            الدورة {Math.min(completedCycles + (phase === 'complete' ? 0 : 1), targetCycles)} من{' '}
+            {targetCycles}
+          </span>
           <span>{Math.ceil((targetCycles * (inhaleSeconds + exhaleSeconds)) / 60)} دقائق تقريبًا</span>
         </div>
       </div>
@@ -159,20 +166,44 @@ export function BreathingTool({ reducedMotion = false, onComplete }: BreathingTo
         <div className="settings-grid three-col">
           <label>
             <span>الشهيق</span>
-            <select value={inhaleSeconds} onChange={(event) => setInhaleSeconds(Number(event.target.value))} disabled={running}>
-              {[3, 4, 5].map((value) => <option key={value} value={value}>{value} ثوانٍ</option>)}
+            <select
+              value={inhaleSeconds}
+              onChange={(event) => setInhaleSeconds(Number(event.target.value))}
+              disabled={running}
+            >
+              {[3, 4, 5].map((value) => (
+                <option key={value} value={value}>
+                  {value} ثوانٍ
+                </option>
+              ))}
             </select>
           </label>
           <label>
             <span>الزفير</span>
-            <select value={exhaleSeconds} onChange={(event) => setExhaleSeconds(Number(event.target.value))} disabled={running}>
-              {[4, 5, 6, 7, 8].map((value) => <option key={value} value={value}>{value} ثوانٍ</option>)}
+            <select
+              value={exhaleSeconds}
+              onChange={(event) => setExhaleSeconds(Number(event.target.value))}
+              disabled={running}
+            >
+              {[4, 5, 6, 7, 8].map((value) => (
+                <option key={value} value={value}>
+                  {value} ثوانٍ
+                </option>
+              ))}
             </select>
           </label>
           <label>
             <span>عدد الدورات</span>
-            <select value={targetCycles} onChange={(event) => setTargetCycles(Number(event.target.value))} disabled={running}>
-              {[6, 10, 15, 20, 30].map((value) => <option key={value} value={value}>{value}</option>)}
+            <select
+              value={targetCycles}
+              onChange={(event) => setTargetCycles(Number(event.target.value))}
+              disabled={running}
+            >
+              {[6, 10, 15, 20, 30].map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
             </select>
           </label>
         </div>
@@ -180,7 +211,9 @@ export function BreathingTool({ reducedMotion = false, onComplete }: BreathingTo
 
       <div className="micro-note">
         <Icon name="info" size={17} />
-        <span>لو شعرت بدوخة، ارجع للتنفس الطبيعي. ولو التركيز على النفس يزعجك، استخدم تمرين الحواس بدلًا منه.</span>
+        <span>
+          لو شعرت بدوخة، ارجع للتنفس الطبيعي. ولو التركيز على النفس يزعجك، استخدم تمرين الحواس بدلًا منه.
+        </span>
       </div>
     </section>
   );

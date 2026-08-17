@@ -19,7 +19,7 @@ export function GroundingTool({ onComplete }: GroundingToolProps) {
   const [draft, setDraft] = useState('');
   const [complete, setComplete] = useState(false);
 
-  const current = steps[activeStep];
+  const current = steps[activeStep] ?? steps[0]!;
   const currentAnswers = answers[activeStep] ?? [];
   const totalNeeded = steps.reduce((sum, step) => sum + step.count, 0);
   const totalAdded = Object.values(answers).reduce((sum, values) => sum + values.length, 0);
@@ -66,7 +66,9 @@ export function GroundingTool({ onComplete }: GroundingToolProps) {
   return (
     <section className="tool-card grounding-card">
       <div className="tool-card-head">
-        <div className="tool-title-icon lilac"><Icon name="compass" /></div>
+        <div className="tool-title-icon lilac">
+          <Icon name="compass" />
+        </div>
         <div>
           <span className="eyebrow">5 · 4 · 3 · 2 · 1</span>
           <h3>العودة للحواس</h3>
@@ -92,22 +94,33 @@ export function GroundingTool({ onComplete }: GroundingToolProps) {
         })}
       </div>
 
-      <div className="grounding-progress"><span style={{ width: `${progress}%` }} /></div>
+      <div className="grounding-progress">
+        <span style={{ width: `${progress}%` }} />
+      </div>
 
       {!complete ? (
         <div className="grounding-stage">
           <div className="grounding-prompt">
-            <div className="sense-icon"><Icon name={current.icon} size={26} /></div>
+            <div className="sense-icon">
+              <Icon name={current.icon} size={26} />
+            </div>
             <div>
               <span>{remainingLabel}</span>
-              <h4>{current.count} {current.label}</h4>
+              <h4>
+                {current.count} {current.label}
+              </h4>
               <p>{current.hint}</p>
             </div>
           </div>
 
           <div className="answer-chips">
             {currentAnswers.map((answer, index) => (
-              <button key={`${answer}-${index}`} type="button" onClick={() => removeAnswer(index)} title="اضغط للحذف">
+              <button
+                key={`${answer}-${index}`}
+                type="button"
+                onClick={() => removeAnswer(index)}
+                title="اضغط للحذف"
+              >
                 {answer}
                 <Icon name="close" size={13} />
               </button>
@@ -128,7 +141,12 @@ export function GroundingTool({ onComplete }: GroundingToolProps) {
               aria-label="ملاحظة حسية"
               disabled={currentAnswers.length >= current.count}
             />
-            <button className="button button-primary square" type="button" onClick={addAnswer} disabled={!canAdd}>
+            <button
+              className="button button-primary square"
+              type="button"
+              onClick={addAnswer}
+              disabled={!canAdd}
+            >
               <Icon name="plus" />
               <span className="sr-only">إضافة</span>
             </button>
@@ -136,7 +154,9 @@ export function GroundingTool({ onComplete }: GroundingToolProps) {
         </div>
       ) : (
         <div className="completion-state">
-          <div className="completion-icon"><Icon name="leaf" size={30} /></div>
+          <div className="completion-icon">
+            <Icon name="leaf" size={30} />
+          </div>
           <span className="eyebrow">رجعت للحاضر</span>
           <h4>لاحظ مكانك واسم اليوم مرة أخيرة</h4>
           <p>لا تحتاج أن تشعر بهدوء كامل. يكفي أنك نقلت انتباهك من التوقع إلى ما يحدث الآن.</p>

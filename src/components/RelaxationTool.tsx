@@ -71,7 +71,9 @@ export function RelaxationTool({ onComplete }: RelaxationToolProps) {
   return (
     <section className="tool-card relaxation-card">
       <div className="tool-card-head">
-        <div className="tool-title-icon peach"><Icon name="sparkles" /></div>
+        <div className="tool-title-icon peach">
+          <Icon name="sparkles" />
+        </div>
         <div>
           <span className="eyebrow">شد 4 · إرخاء 8</span>
           <h3>استرخاء عضلي مصغّر</h3>
@@ -82,7 +84,10 @@ export function RelaxationTool({ onComplete }: RelaxationToolProps) {
       <div className="relaxation-stage">
         <div className="body-map" aria-hidden="true">
           {groups.map((group, index) => (
-            <span key={group} className={`${index === groupIndex ? 'is-active' : ''} ${index < groupIndex || stage === 'complete' ? 'is-done' : ''}`} />
+            <span
+              key={group}
+              className={`${index === groupIndex ? 'is-active' : ''} ${index < groupIndex || stage === 'complete' ? 'is-done' : ''}`}
+            />
           ))}
         </div>
 
@@ -94,15 +99,25 @@ export function RelaxationTool({ onComplete }: RelaxationToolProps) {
           </div>
         ) : (
           <div className="relaxation-copy">
-            <span className="eyebrow">المجموعة {groupIndex + 1} من {groups.length}</span>
+            <span className="eyebrow">
+              المجموعة {groupIndex + 1} من {groups.length}
+            </span>
             <h4>{stage === 'idle' ? 'ابدأ بوضع مريح' : groups[groupIndex]}</h4>
-            <p>{stage === 'tense' ? 'شد برفق… من غير ألم' : stage === 'release' ? 'اترك العضلة تمامًا ولاحظ الفرق' : 'سنمر على خمس مجموعات عضلية بصورة بسيطة.'}</p>
-            <strong className="relaxation-count">{stage === 'idle' ? '—' : remaining}</strong>
+            <p>
+              {stage === 'tense'
+                ? 'شد برفق… من غير ألم'
+                : stage === 'release'
+                  ? 'اترك العضلة تمامًا ولاحظ الفرق'
+                  : 'سنمر على خمس مجموعات عضلية بصورة بسيطة.'}
+            </p>
+            <strong className="relaxation-count">{stage === 'idle' ? '-' : remaining}</strong>
           </div>
         )}
       </div>
 
-      <div className="breathing-progress"><span style={{ width: `${progress}%` }} /></div>
+      <div className="breathing-progress">
+        <span style={{ width: `${progress}%` }} />
+      </div>
 
       <div className="breathing-controls">
         {!running ? (

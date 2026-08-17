@@ -8,7 +8,16 @@ import { SettingsView } from './components/SettingsView';
 import { TodayView } from './components/TodayView';
 import { ToolsView } from './components/ToolsView';
 import { usePersistentState } from './hooks/usePersistentState';
-import type { AppSettings, AppState, CheckIn, CoreTaskId, DayRecord, JournalEntry, ViewId, WeekNumber } from './types';
+import type {
+  AppSettings,
+  AppState,
+  CheckIn,
+  CoreTaskId,
+  DayRecord,
+  JournalEntry,
+  ViewId,
+  WeekNumber,
+} from './types';
 import { createDayRecord, createInitialState, formatArabicDate, STORAGE_KEY, toLocalDateKey } from './utils';
 
 const views: ViewId[] = ['today', 'plan', 'tools', 'journal', 'progress', 'settings'];
@@ -195,27 +204,46 @@ export default function App() {
   })();
 
   return (
-    <div className={`app-shell ${state.settings.compactMode ? 'compact-mode' : ''} ${state.settings.reducedMotion ? 'reduce-motion' : ''}`}>
-      <AppNav activeView={activeView} onNavigate={setActiveView} open={navOpen} onClose={() => setNavOpen(false)} />
+    <div
+      className={`app-shell ${state.settings.compactMode ? 'compact-mode' : ''} ${state.settings.reducedMotion ? 'reduce-motion' : ''}`}
+    >
+      <AppNav
+        activeView={activeView}
+        onNavigate={setActiveView}
+        open={navOpen}
+        onClose={() => setNavOpen(false)}
+      />
 
       <div className="app-main">
         <header className="mobile-header">
-          <button className="icon-button" type="button" onClick={() => setNavOpen(true)} aria-label="فتح القائمة">
+          <button
+            className="icon-button"
+            type="button"
+            onClick={() => setNavOpen(true)}
+            aria-label="فتح القائمة"
+          >
             <Icon name="menu" />
           </button>
           <div className="mobile-brand">
             <span className="mini-brand-mark" />
             <strong>سَكينة</strong>
           </div>
-          <span className="mobile-date">{formatArabicDate(todayKey, { day: 'numeric', month: 'short' })}</span>
+          <span className="mobile-date">
+            {formatArabicDate(todayKey, { day: 'numeric', month: 'short' })}
+          </span>
         </header>
 
         <main className="content-wrap">{view}</main>
 
         <footer className="app-footer">
-          <div><span className="mini-brand-mark" /><strong>سَكينة</strong></div>
+          <div>
+            <span className="mini-brand-mark" />
+            <strong>سَكينة</strong>
+          </div>
           <p>أداة مساعدة ذاتية، وليست بديلًا عن التشخيص أو العلاج المهني.</p>
-          <button type="button" onClick={() => setActiveView('settings')}>حدود الاستخدام والخصوصية</button>
+          <button type="button" onClick={() => setActiveView('settings')}>
+            حدود الاستخدام والخصوصية
+          </button>
         </footer>
       </div>
     </div>

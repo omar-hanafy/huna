@@ -21,7 +21,7 @@ Prettier.
 
 - Node 20+. All dependencies pinned to exact versions, lockfile committed.
 - Arabic is the source of truth for tone; English is a translation. RTL default.
-- No `—` character anywhere in source or content (project convention).
+- No `-` character anywhere in source or content (project convention).
 - `--danger` token consumed by exactly one component (`DangerAction`). Enforced by test.
 - No content string may assert the user is safe. Enforced by denylist test.
 - Crisis resources: **Egypt only**. Each carries `lastVerified`; build fails past 365 days.
@@ -34,7 +34,7 @@ Prettier.
 
 ---
 
-## Phase 0 — Foundation
+## Phase 0 - Foundation
 
 **Deliverable:** reproducible build, green CI, error boundary. Defects 1, 2, 3, 14, 22.
 
@@ -69,7 +69,7 @@ Prettier.
 **Files:** `eslint.config.js`, `.prettierrc.json`, `.prettierignore`
 
 - [ ] Flat ESLint config: typescript-eslint recommended, react-hooks, react-refresh
-- [ ] Custom rule config banning the `—` character via `no-restricted-syntax` on literals
+- [ ] Custom rule config banning the `-` character via `no-restricted-syntax` on literals
 - [ ] Prettier: single quotes, 110 print width, no trailing comma conflicts with ESLint
 - [ ] Verify: `npm run lint` and `npm run format` both clean on the existing tree
 
@@ -97,6 +97,7 @@ Prettier.
 **Files:** `src/components/ErrorBoundary.tsx`, `src/main.tsx`, test
 
 **Interfaces:**
+
 - Produces: `<ErrorBoundary onExport={() => void}>` class component
 
 - [ ] Test: renders children normally; on a thrown child, renders recovery UI with a
@@ -113,7 +114,7 @@ Prettier.
 
 ---
 
-## Phase 1 — Storage and content
+## Phase 1 - Storage and content
 
 **Deliverable:** existing app on the new foundation with data intact. Defects 4, 8, 9, 10.
 
@@ -122,6 +123,7 @@ Prettier.
 **Files:** `src/content/schema.ts`, test
 
 **Interfaces:**
+
 - Produces: `uiSchema`, `sequenceSchema`, `sequencesSchema`, `programSchema`,
   `crisisSchema`, and inferred types `Sequence`, `SequenceStep`, `ProgramWeek`,
   `CrisisResource`
@@ -132,7 +134,7 @@ type SequenceStep = {
   text: string;
   kind: 'orient' | 'sense' | 'body' | 'breath' | 'move' | 'thought' | 'action';
   seconds: number;
-  substituteFor?: string;   // step id this replaces when breathing is disabled
+  substituteFor?: string; // step id this replaces when breathing is disabled
 };
 type Sequence = { id: StateId; title: string; steps: SequenceStep[] };
 ```
@@ -158,7 +160,7 @@ type Sequence = { id: StateId; title: string; steps: SequenceStep[] };
 **Files:** `src/content/en/{ui,sequences,program,crisis}.json`
 
 - [ ] Translate all four files
-- [ ] Test: ar/en key parity — every key in one exists in the other, recursively
+- [ ] Test: ar/en key parity - every key in one exists in the other, recursively
 
 ### Task 1.4: Content guard tests
 
@@ -167,25 +169,32 @@ type Sequence = { id: StateId; title: string; steps: SequenceStep[] };
 - [ ] Denylist test: no content string asserts safety (`أنت آمن`, `المكان آمن`,
       `you are safe`, `you're safe`, `it is safe`)
 - [ ] Freshness test: no crisis resource `lastVerified` older than 365 days
-- [ ] No `—` character in any content file
+- [ ] No `-` character in any content file
 
 ### Task 1.5: Storage interface and types
 
 **Files:** `src/storage/types.ts`, `src/storage/AppStorage.ts`
 
 **Interfaces:**
+
 - Produces: `AppStorage` interface per spec §16.2, plus record types `DayRecord`,
   `AlertSession`, `SafetyCheck`, `JournalEntry`, `LadderItem`, `LadderSession`,
   `ValueCommitment`, `CopingCard`, `UserPreferences`, `Meta`, `ExportBundle`
 
 ```ts
 type AlertSession = {
-  id: string; startedAt: string; endedAt: string | null;
+  id: string;
+  startedAt: string;
+  endedAt: string | null;
   safetyAnswer: 'yes' | 'no' | 'unsure';
-  stateId: StateId | null; sequenceId: string | null;
-  activationBefore: number | null; activationAfter: number | null;
-  chosenAction: string | null; actionCompleted: boolean | null;
-  whatHelped: string | null; followUpMissed: boolean;
+  stateId: StateId | null;
+  sequenceId: string | null;
+  activationBefore: number | null;
+  activationAfter: number | null;
+  chosenAction: string | null;
+  actionCompleted: boolean | null;
+  whatHelped: string | null;
+  followUpMissed: boolean;
 };
 ```
 
@@ -207,6 +216,7 @@ type AlertSession = {
 **Files:** `src/storage/migrations/fromSakinaV1.ts`, test
 
 **Interfaces:**
+
 - Produces: `migrateFromSakinaV1(raw: string | null, storage: AppStorage): Promise<MigrationResult>`
 
 - [ ] Zod schema for the legacy `sakina.app-state.v1` shape
@@ -241,13 +251,14 @@ type AlertSession = {
 
 ---
 
-## Phase 2 — The alert flow
+## Phase 2 - The alert flow
 
 **Deliverable:** the core intervention is usable. Defects 5, 6. **Program can start here.**
 
 ### Task 2.1: `src/core/safety-window.ts`
 
 **Interfaces:**
+
 - Produces: `isWithinLockout(lastCheck: SafetyCheck | null, now: Date, windowMinutes: number): boolean`,
   `minutesSince(check: SafetyCheck, now: Date): number`
 
@@ -258,6 +269,7 @@ type AlertSession = {
 ### Task 2.2: `src/core/alert-flow.ts`
 
 **Interfaces:**
+
 - Produces: `type AlertStep`, `type AlertFlowState`, `alertFlowReducer(state, event)`,
   `initialAlertFlow()`, `nextRoute(state): string`, `resumeFrom(session): AlertFlowState`
 
@@ -270,6 +282,7 @@ type AlertSession = {
 ### Task 2.3: `src/core/exercise-selector.ts`
 
 **Interfaces:**
+
 - Produces: `selectSequence(stateId: StateId, sequences: Sequence[], prefs: UserPreferences): Sequence`
 
 - [ ] Tests: each of the seven states returns its sequence; with `breathingEnabled: false`
@@ -280,6 +293,7 @@ type AlertSession = {
 ### Task 2.4: `src/core/recovery-metrics.ts`
 
 **Interfaces:**
+
 - Produces: `returnToLifeRate(sessions): { rate: number | null; answered: number }`,
   `medianRecoveryMinutes(sessions)`, `repeatCheckTrend(checks, days)`,
   `sessionsUnderTwoMinutes(sessions)`
@@ -292,6 +306,7 @@ type AlertSession = {
 ### Task 2.5: `src/core/program.ts`
 
 **Interfaces:**
+
 - Produces: `suggestedWeek(startedAt: string, now: Date): 1|2|3|4`, `isOverridden(prefs)`
 
 - [ ] Tests: day 1 → week 1; day 7 → week 1; day 8 → week 2; day 29+ → week 4;
@@ -335,6 +350,7 @@ type AlertSession = {
 **Files:** `src/features/followUp/FollowUpPrompt.tsx`, `src/core/followUp.ts`, tests
 
 **Interfaces:**
+
 - Produces: `pendingFollowUp(sessions, now): AlertSession | null`
 
 - [ ] Tests: shown on next open between 5 and 60 minutes after session end; not shown
@@ -351,7 +367,7 @@ type AlertSession = {
 
 ---
 
-## Phase 3 — Design system
+## Phase 3 - Design system
 
 **Deliverable:** visual identity complete. Defects 15, 16, 17, 19, 20.
 
@@ -417,7 +433,7 @@ type AlertSession = {
 
 ---
 
-## Phase 4 — PWA and deployment
+## Phase 4 - PWA and deployment
 
 **Deliverable:** installed on the phone, works offline. Defects 12, 13.
 
@@ -461,16 +477,22 @@ type AlertSession = {
 
 ---
 
-## Phase 5 — Program features
+## Phase 5 - Program features
 
 **Deliverable:** feature-complete.
 
-### Task 5.1: Life Ladder — items and sessions
-### Task 5.2: Life Ladder — SUDs capture at 0/5/10/15/20 and the habituation chart
+### Task 5.1: Life Ladder - items and sessions
+
+### Task 5.2: Life Ladder - SUDs capture at 0/5/10/15/20 and the habituation chart
+
 ### Task 5.3: Coping card, including "ما الذي لا يساعدني", printable
+
 ### Task 5.4: Journal rewritten to neutral language, plus the safety-behavior counter
+
 ### Task 5.5: Busy-day mode
+
 ### Task 5.6: Values and daily micro-commitments
+
 ### Task 5.7: Progress screen, opt-in, with the insight rules and their guard test
 
 Each carries its own tests. Detailed steps written at the start of Phase 5, once
@@ -478,12 +500,16 @@ Phases 1 and 2 have settled the storage and content shapes.
 
 ---
 
-## Phase 6 — Polish
+## Phase 6 - Polish
 
 ### Task 6.1: Accessibility audit against spec §19
+
 ### Task 6.2: Full E2E suite per spec §20
+
 ### Task 6.3: README and `PROJECT_ROADMAP.md` rewritten for هنا
+
 ### Task 6.4: Rename the working directory to `huna`
+
 ### Task 6.5: Performance pass, bundle budget
 
 ---

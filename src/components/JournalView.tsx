@@ -59,8 +59,14 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
       <section className="page-intro journal-intro">
         <div>
           <span className="eyebrow">سجل واحد يكفي</span>
-          <h1>نفهم الإنذار.<br />من غير ما نعيش داخله.</h1>
-          <p>الغرض هو رؤية النمط بوضوح، لا تحليل كل لحظة. اختر موقفًا واحدًا مهمًا، ثم اترك السجل وارجع ليومك.</p>
+          <h1>
+            نفهم الإنذار.
+            <br />
+            من غير ما نعيش داخله.
+          </h1>
+          <p>
+            الغرض هو رؤية النمط بوضوح، لا تحليل كل لحظة. اختر موقفًا واحدًا مهمًا، ثم اترك السجل وارجع ليومك.
+          </p>
         </div>
         <div className="journal-quote">
           <Icon name="journal" size={22} />
@@ -73,7 +79,11 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
         title="مسافة صغيرة بين الفكرة والواقع"
         description="لا يلزم ملء كل الحقول. اكتب ما يساعدك على رؤية الصورة، واترك الباقي."
         action={
-          <button className="button button-primary" type="button" onClick={() => setShowForm((value) => !value)}>
+          <button
+            className="button button-primary"
+            type="button"
+            onClick={() => setShowForm((value) => !value)}
+          >
             <Icon name={showForm ? 'close' : 'plus'} size={17} />
             {showForm ? 'إغلاق النموذج' : 'إضافة موقف'}
           </button>
@@ -84,7 +94,10 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
         <form className="journal-form panel-card" onSubmit={submit}>
           <div className="form-step-heading">
             <span>01</span>
-            <div><h3>ماذا حدث قبل الاستنفار؟</h3><p>صف الموقف في جملة أو جملتين، من غير تفسير طويل.</p></div>
+            <div>
+              <h3>ماذا حدث قبل الاستنفار؟</h3>
+              <p>صف الموقف في جملة أو جملتين، من غير تفسير طويل.</p>
+            </div>
           </div>
           <textarea
             value={form.trigger}
@@ -98,7 +111,10 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
 
           <div className="form-step-heading">
             <span>02</span>
-            <div><h3>ماذا توقّع عقلك أن يحدث؟</h3><p>اكتب التوقع كما ظهر، من غير لوم أو تصحيح فوري.</p></div>
+            <div>
+              <h3>ماذا توقّع عقلك أن يحدث؟</h3>
+              <p>اكتب التوقع كما ظهر، من غير لوم أو تصحيح فوري.</p>
+            </div>
           </div>
           <textarea
             value={form.prediction}
@@ -111,7 +127,9 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
 
           <div className="evidence-grid">
             <label>
-              <span className="field-title"><Icon name="shield" size={17} /> ما الدليل على خطر مباشر الآن؟</span>
+              <span className="field-title">
+                <Icon name="shield" size={17} /> ما الدليل على خطر مباشر الآن؟
+              </span>
               <textarea
                 value={form.evidenceDanger}
                 onChange={(event) => update('evidenceDanger', event.target.value)}
@@ -120,7 +138,9 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
               />
             </label>
             <label>
-              <span className="field-title"><Icon name="compass" size={17} /> ما الدليل أنه إنذار زائد؟</span>
+              <span className="field-title">
+                <Icon name="compass" size={17} /> ما الدليل أنه إنذار زائد؟
+              </span>
               <textarea
                 value={form.evidenceAlarm}
                 onChange={(event) => update('evidenceAlarm', event.target.value)}
@@ -193,7 +213,9 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
               <Icon name="check" size={18} />
               حفظ الموقف والعودة لليوم
             </button>
-            <button className="button button-ghost" type="button" onClick={() => setForm(emptyForm)}>مسح الحقول</button>
+            <button className="button button-ghost" type="button" onClick={() => setForm(emptyForm)}>
+              مسح الحقول
+            </button>
           </div>
         </form>
       ) : null}
@@ -231,10 +253,22 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
                     <Icon className="entry-chevron" name="chevron" size={18} />
                   </summary>
                   <div className="entry-details">
-                    <div><span>دليل الخطر</span><p>{entry.evidenceDanger || '—'}</p></div>
-                    <div><span>دليل الإنذار الزائد</span><p>{entry.evidenceAlarm || '—'}</p></div>
-                    <div><span>ما تم فعله</span><p>{entry.response || '—'}</p></div>
-                    <div><span>مدة العودة</span><p>{entry.recoveryMinutes === null ? 'غير مسجلة' : `${entry.recoveryMinutes} دقيقة`}</p></div>
+                    <div>
+                      <span>دليل الخطر</span>
+                      <p>{entry.evidenceDanger || '-'}</p>
+                    </div>
+                    <div>
+                      <span>دليل الإنذار الزائد</span>
+                      <p>{entry.evidenceAlarm || '-'}</p>
+                    </div>
+                    <div>
+                      <span>ما تم فعله</span>
+                      <p>{entry.response || '-'}</p>
+                    </div>
+                    <div>
+                      <span>مدة العودة</span>
+                      <p>{entry.recoveryMinutes === null ? 'غير مسجلة' : `${entry.recoveryMinutes} دقيقة`}</p>
+                    </div>
                     <button className="delete-entry" type="button" onClick={() => onDelete(entry.id)}>
                       <Icon name="trash" size={16} /> حذف هذا السجل
                     </button>
@@ -245,7 +279,9 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
           </div>
         ) : (
           <div className="empty-state">
-            <div><Icon name="journal" size={28} /></div>
+            <div>
+              <Icon name="journal" size={28} />
+            </div>
             <h3>ابدأ فقط عندما يوجد موقف يستحق التسجيل</h3>
             <p>لا تحتاج إلى كتابة يوميات طويلة. موقف واحد واضح يمكن أن يكشف نمطًا مفيدًا.</p>
             <button className="button button-secondary" type="button" onClick={() => setShowForm(true)}>
@@ -257,7 +293,10 @@ export function JournalView({ entries, onAdd, onDelete, onMarkFocusComplete }: J
 
       <div className="micro-note spacious">
         <Icon name="info" size={18} />
-        <span>هذا السجل ليس مناسبًا لاسترجاع تفاصيل صدمة أو تنفيذ تعرّض للذكريات بمفردك. عند وجود استرجاعات أو انفصال عن الواقع، الأفضل استخدامه مع مختص مؤهل.</span>
+        <span>
+          هذا السجل ليس مناسبًا لاسترجاع تفاصيل صدمة أو تنفيذ تعرّض للذكريات بمفردك. عند وجود استرجاعات أو
+          انفصال عن الواقع، الأفضل استخدامه مع مختص مؤهل.
+        </span>
       </div>
     </div>
   );

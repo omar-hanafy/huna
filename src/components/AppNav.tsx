@@ -8,7 +8,12 @@ interface AppNavProps {
   onClose: () => void;
 }
 
-const items: Array<{ id: ViewId; label: string; description: string; icon: Parameters<typeof Icon>[0]['name'] }> = [
+const items: Array<{
+  id: ViewId;
+  label: string;
+  description: string;
+  icon: Parameters<typeof Icon>[0]['name'];
+}> = [
   { id: 'today', label: 'اليوم', description: 'روتينك الحالي', icon: 'home' },
   { id: 'plan', label: 'الخطة', description: 'أربعة أسابيع', icon: 'calendar' },
   { id: 'tools', label: 'الأدوات', description: 'تنفّس وتثبيت', icon: 'tools' },
@@ -41,7 +46,12 @@ export function AppNav({ activeView, onNavigate, open, onClose }: AppNavProps) {
             <strong>سَكينة</strong>
             <span>رفيق يومي لطيف</span>
           </div>
-          <button className="icon-button nav-close" type="button" onClick={onClose} aria-label="إغلاق القائمة">
+          <button
+            className="icon-button nav-close"
+            type="button"
+            onClick={onClose}
+            aria-label="إغلاق القائمة"
+          >
             <Icon name="close" />
           </button>
         </div>
@@ -55,7 +65,9 @@ export function AppNav({ activeView, onNavigate, open, onClose }: AppNavProps) {
               type="button"
               aria-current={activeView === item.id ? 'page' : undefined}
             >
-              <span className="nav-icon"><Icon name={item.icon} /></span>
+              <span className="nav-icon">
+                <Icon name={item.icon} />
+              </span>
               <span className="nav-copy">
                 <strong>{item.label}</strong>
                 <small>{item.description}</small>
@@ -66,7 +78,9 @@ export function AppNav({ activeView, onNavigate, open, onClose }: AppNavProps) {
         </nav>
 
         <div className="nav-note">
-          <span className="nav-note-icon"><Icon name="heart" size={18} /></span>
+          <span className="nav-note-icon">
+            <Icon name="heart" size={18} />
+          </span>
           <p>الهدف مش إنك تبقى هادئ 100٪. الهدف إنك ترجع لنفسك أسرع، وبضغط أقل.</p>
         </div>
 
