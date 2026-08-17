@@ -1,139 +1,119 @@
-# سَكينة - Sakina
+# هنا / Huna
 
-واجهة عربية تفاعلية تساعد المستخدم على تطبيق خطة يومية مرنة للتعامل مع الاستنفار واليقظة المفرطة، مع حفظ البيانات محليًا في المتصفح.
+**تحقّق مرة. ارجع للحاضر. اختر. أكمل.**
+_Check once. Ground. Choose. Return._
 
-> **تنبيه:** سَكينة أداة مساعدة ذاتية وليست تشخيصًا أو علاجًا طبيًا، ولا تحل محل مختص نفسي أو طبي مؤهل.
+A private, local-first companion for moments when your internal alarm is too
+sensitive. It helps you tell immediate danger apart from elevated alarm,
+regulate for 60 to 120 seconds, and return to one meaningful action, without
+reinforcing repeated checking.
 
-## ما الموجود في النسخة الأولى؟
+> **هنا أداة مساعدة ذاتية، وليست تشخيصًا أو علاجًا طبيًا.** لا تستطيع أن تعرف إن كنت في
+> خطر. عند استمرار الأعراض أو تأثيرها على نومك أو عملك أو علاقاتك، اطلب تقييمًا من مختص
+> نفسي أو طبي مؤهل. إذا كنت في خطر مباشر، أو ظهرت أفكار بإيذاء النفس، تواصل فورًا مع
+> خدمات الطوارئ المحلية أو شخص موثوق، ولا تبقَ وحدك.
 
-- واجهة عربية كاملة واتجاه RTL، ومتجاوبة مع الموبايل والكمبيوتر.
-- لوحة يومية تحتوي على 6 خطوات قصيرة ومؤشر إنجاز.
-- خطة من أربعة أسابيع يمكن التنقل بينها بحرية.
-- مؤقت تنفس قابل لتعديل الشهيق والزفير وعدد الدورات.
-- تمرين Grounding تفاعلي بنظام 5-4-3-2-1.
-- استرخاء عضلي تدريجي مصغّر.
-- ثلاث مراجعات سريعة لمستوى الاستنفار خلال اليوم.
-- سجل محفزات يفرّق بين الخطر المباشر والإنذار الزائد.
-- صفحة تقدم تعرض آخر 14 يومًا، النوم، التعافي، والاستمرارية.
-- تخزين محلي باستخدام `localStorage`.
-- تصدير واستيراد كل البيانات بصيغة JSON.
-- إعداد لتقليل الحركة ووضع عرض مضغوط.
+## Your data never leaves your device
 
-## التشغيل
+Everything you write lives in this browser's IndexedDB. There is no account, no
+server, no analytics, no telemetry, and no network request at runtime. This
+repository contains the app, never anyone's entries: a visitor to the deployed
+URL gets an empty app.
 
-المتطلبات: Node.js 20 أو أحدث.
+Export and permanent delete are both one tap away in settings.
+
+## What it does
+
+- **The alert flow.** One safety check with three honest answers, a check-once
+  seal, a short grounding sequence chosen by what you are actually feeling, and
+  a closing question about what small thing you want to return to.
+- **Seven grounding routes**, one per reported state, rather than a library of
+  exercises to choose between while your concentration is poor.
+- **Breathing is optional.** Say at setup that breath focus makes things worse
+  and every breathing step in the app is replaced by a tactile or movement
+  alternative.
+- **A four-week program**, suggested and never locked.
+- **A coping card** you can print, including what does _not_ help you.
+- **Practice tools**: paced breathing, 5-4-3-2-1 senses, muscle release.
+- **Discreet mode** that makes the interface read as an ordinary timer.
+- Arabic and English, RTL and LTR.
+
+## Running it
+
+Requires Node 20 or newer.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-ثم افتح العنوان الذي يظهر في الطرفية، وغالبًا:
-
-```text
-http://localhost:5173
-```
-
-لإنشاء نسخة production:
-
 ```bash
-npm run build
-npm run preview
+npm run verify   # typecheck, lint, unit tests, build
+npm run e2e      # Playwright; first run needs: npx playwright install
 ```
 
-## بنية المشروع
+## Quick access on iPhone
 
-```text
-src/
-├── components/
-│   ├── AppNav.tsx
-│   ├── BreathingTool.tsx
-│   ├── GroundingTool.tsx
-│   ├── JournalView.tsx
-│   ├── PlanView.tsx
-│   ├── ProgressView.tsx
-│   ├── RelaxationTool.tsx
-│   ├── SettingsView.tsx
-│   ├── TodayView.tsx
-│   └── ToolsView.tsx
-├── data/
-│   └── plan.ts
-├── hooks/
-│   └── usePersistentState.ts
-├── App.tsx
-├── main.tsx
-├── styles.css
-├── types.ts
-└── utils.ts
-```
+iOS ignores a web app manifest's `shortcuts`, so the one-tap route into the
+alert flow is a Shortcut you make yourself. It is worth the two minutes, because
+the whole point is reaching the flow without hunting for an app.
 
-## نموذج البيانات
+1. Install the app: open the site in Safari, then **Share → Add to Home Screen**.
+2. Open **Shortcuts** and create a new shortcut with a single **Open URL** action
+   pointing at `https://omar-hanafy.github.io/huna/#/alert`.
+3. Name it something you would actually say, then bind it:
+   - **Settings → Accessibility → Touch → Back Tap → Double Tap** → your
+     shortcut. Two taps on the back of the phone, from anywhere.
+   - Or, on iPhone 15 Pro and newer, **Settings → Action Button → Shortcut**.
 
-حالة التطبيق موجودة في `AppState` داخل `src/types.ts`، وتحتوي على:
+On Android, long-pressing the installed icon shows the same shortcut from the
+manifest, with nothing to set up.
 
-- `activeWeek`: الأسبوع الحالي.
-- `days`: سجل الأيام والمهام والقياسات السريعة.
-- `journal`: مواقف المحفزات.
-- `settings`: إعدادات العرض.
+## Architecture
 
-مفتاح التخزين المحلي:
+Three layers are deliberately free of React, so a future native app would be a
+port rather than a rewrite:
 
-```text
-sakina.app-state.v1
-```
+| Path                               | What it is                                                 | Portable?              |
+| ---------------------------------- | ---------------------------------------------------------- | ---------------------- |
+| `src/content/**`                   | Versioned JSON: sequences, program, copy, crisis resources | Yes, verbatim          |
+| `src/core/**`                      | Pure logic. No React, no DOM, no I/O, time as a parameter  | Yes, transliterate     |
+| `src/storage/AppStorage.ts`        | The single boundary to persistence                         | Interface yes, impl no |
+| `src/routes/**`, `src/features/**` | The UI                                                     | Expected throwaway     |
 
-تمت إضافة `version` للحالة لتسهيل كتابة migrations مستقبلًا.
+`src/core` holds the safety-critical behaviour and is covered at 100%, so a
+redesign can move every pixel without being able to change what happens when
+someone answers "there may be danger".
 
-## أماكن مناسبة للتطوير
+### Guard tests
 
-### 1. طبقة البيانات
+Some rules decay if they are only written down, so they are enforced instead:
 
-استبدل `usePersistentState` بطبقة repository مثل:
+- `src/design-system/danger.guard.test.ts` fails if any module other than
+  `DangerAction` touches `--danger`, or hard-codes a red. Red means a danger the
+  user reported, never a high activation score.
+- `src/content/content.guard.test.ts` fails if any string asserts the user is
+  safe, if a crisis number has not been verified within 365 days, or if the two
+  locales drift apart in keys or interpolation placeholders.
+- `src/test/conventions.test.ts` fails on an em-dash anywhere, or on any module
+  outside the storage layer reaching for `localStorage`.
 
-```text
-UI → Zustand/Redux/TanStack Query → Repository → API/IndexedDB
-```
+## Crisis resources
 
-يفضل تشفير البيانات الحساسة قبل المزامنة، مع موافقة صريحة وواضحة من المستخدم.
+Numbers are verified against published sources at authoring time, never written
+from memory, and each carries the date it was checked and a link to its source.
+A country with no verified entries shows written guidance rather than a number,
+because a wrong number here is worse than none. Currently verified: **Egypt**.
 
-### 2. الحسابات والمخططات
+To re-verify, open the sources listed in `src/content/*/crisis.json` and update
+`lastVerified`. The suite fails once an entry passes a year old.
 
-- متوسط متحرك 7/30 يومًا.
-- ربط النوم والكافيين والمحفزات بمستوى الاستنفار.
-- مقارنة مدة التعافي بدل التركيز على الشدة فقط.
-- كتابة insight engine لا يصدر تشخيصات أو تنبؤات طبية.
+## Documentation
 
-### 3. التذكيرات
+- [Production design spec](docs/superpowers/specs/2026-08-17-huna-production-design.md)
+- [Implementation plan](docs/superpowers/plans/2026-08-17-huna-implementation.md)
+- [Decision log](docs/superpowers/plans/DECISIONS.md)
 
-- PWA + Web Notifications.
-- اختيار المستخدم لمواعيد المراجعات الثلاث.
-- تذكيرات قابلة للإيقاف وليست مصممة لتوليد الشعور بالذنب.
+## Licence
 
-### 4. التخصيص
-
-- خطط يجهزها المعالج للمستخدم.
-- تعديل أسماء المهام ومددها.
-- وضع accessibility أكبر للنصوص والتباين.
-- لغات إضافية مع i18n بدل النصوص المضمّنة مباشرة.
-
-### 5. الخصوصية والأمان
-
-قبل تحويله لخدمة سحابية، راجع على الأقل:
-
-- سياسة الاحتفاظ والحذف النهائي للبيانات.
-- تشفير النقل والتخزين.
-- صلاحيات الوصول وسجل التدقيق.
-- موافقة المستخدم على مشاركة بياناته مع أي مختص.
-- قوانين حماية البيانات المطبقة في الأسواق المستهدفة.
-
-## ملاحظات تصميمية
-
-- لا توجد مكتبة UI أو Icons خارجية؛ الأيقونات SVG داخلية لتبقى البداية خفيفة.
-- كل الألوان والمسافات موجودة كـ CSS variables في بداية `styles.css`.
-- الواجهة تستخدم hash navigation مثل `#/tools`، لذلك لا تحتاج إعداد rewrite على الخادم في النسخة الحالية.
-- أداة التنفس تعلّم المهمة كمكتملة عند انتهاء الجلسة، وكذلك Grounding والاسترخاء العضلي.
-- تسجيل 3 check-ins يعلّم مهمة المراجعات اليومية كمكتملة تلقائيًا.
-
-## حدود المسؤولية
-
-لا تستخدم التطبيق لتشخيص PTSD أو أي اضطراب آخر. لا تضف تنبيهات آلية تدّعي اكتشاف الخطر أو الحالة النفسية من الأرقام وحدها. في حالة الخطر المباشر أو أفكار إيذاء النفس، يجب توجيه المستخدم إلى خدمات الطوارئ المحلية أو شخص موثوق فورًا.
+Personal project. No licence granted.

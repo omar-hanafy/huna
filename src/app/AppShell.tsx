@@ -4,6 +4,7 @@ import { NavLink, Outlet } from 'react-router';
 import { useDocumentChrome } from '../design-system/useDocumentChrome';
 import { usePreferences } from '../storage/hooks';
 import { useStorageContext } from '../storage/useStorage';
+import { UpdateNotice } from './UpdateNotice';
 import './AppShell.css';
 
 const ITEMS = [
@@ -38,6 +39,8 @@ export function AppShell() {
           {problem === 'quota' ? t('settings.storageFull') : t('settings.storageUnavailable')}
         </div>
       ) : null}
+
+      <UpdateNotice />
 
       <main className="app-shell__main">
         <Outlet />

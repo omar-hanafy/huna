@@ -106,3 +106,15 @@
     border-inline-end: 1px solid var(--border);
   }
 }
+
+.update-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-calm);
+  border-block-end: 1px solid var(--border);
+  font-size: var(--text-sm);
+}

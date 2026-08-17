@@ -3,7 +3,9 @@
     "name": "Huna",
     "tagline": "Check once. Ground. Choose. Return.",
     "disclaimer": "A self-help tool, not a substitute for professional diagnosis or treatment.",
-    "privacyNote": "Your data stays on this device."
+    "privacyNote": "Your data stays on this device.",
+    "updateAvailable": "An update is ready.",
+    "updateNow": "Update now"
   },
   "common": {
     "back": "Back",

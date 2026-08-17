@@ -1,19 +1,44 @@
 {
-  "name": "سَكينة — رفيقك اليومي",
-  "short_name": "سَكينة",
-  "description": "خطة يومية مرنة وأدوات تفاعلية للتعامل مع الاستنفار واليقظة المفرطة.",
+  "id": "/huna/",
+  "name": "هنا",
+  "short_name": "هنا",
+  "description": "تحقّق مرة. ارجع للحاضر. اختر. أكمل.",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "/#/today",
+  "start_url": "./#/",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f3f6f3",
-  "theme_color": "#0f766e",
+  "orientation": "portrait",
+  "background_color": "#F7F4EE",
+  "theme_color": "#F7F4EE",
+  "categories": ["health", "lifestyle"],
   "icons": [
     {
-      "src": "/sakina-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "أنا في حالة استنفار",
+      "short_name": "استنفار",
+      "description": "ابدأ التحقق والتثبيت مباشرة.",
+      "url": "./#/alert",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }
