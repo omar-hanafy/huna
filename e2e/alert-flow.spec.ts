@@ -13,6 +13,33 @@ async function completeOnboarding(page: Page) {
   await expect(page).toHaveURL(/#\/$/);
 }
 
+/**
+ * Waits for the open session on disk to match, before a reload.
+ *
+ * The flow writes every transition immediately, but a reload fired in the same
+ * millisecond can still outrun the write. Asserting on the stored record first
+ * tests what the resume actually depends on rather than racing it.
+ */
+async function waitForOpenSession(page: Page, expected: Record<string, unknown>) {
+  await page.waitForFunction(async (want) => {
+    const request = indexedDB.open('huna');
+    const db = await new Promise<IDBDatabase>((resolve) => {
+      request.onsuccess = () => resolve(request.result);
+    });
+    const rows = await new Promise<Record<string, unknown>[]>((resolve) => {
+      const query = db.transaction('alertSessions', 'readonly').objectStore('alertSessions').getAll();
+      query.onsuccess = () => resolve(query.result as Record<string, unknown>[]);
+    });
+    db.close();
+
+    const open = rows
+      .filter((row) => row.endedAt === null)
+      .sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)))[0];
+    if (!open) return false;
+    return Object.entries(want).every(([key, value]) => open[key] === value);
+  }, expected);
+}
+
 test.describe('the alert flow', () => {
   test.beforeEach(async ({ page }) => {
     await completeOnboarding(page);
@@ -86,6 +113,7 @@ test.describe('the alert flow', () => {
     await page.getByRole('button', { name: /لم يتغيّر شيء/ }).click();
     await page.getByRole('button', { name: /صوت أو حركة أفزعتني/ }).click();
     await expect(page.getByText(/الخطوة 1 من 5/)).toBeVisible();
+    await waitForOpenSession(page, { step: 'sequence', stepIndex: 0 });
 
     await page.reload();
 
@@ -105,6 +133,7 @@ test.describe('the alert flow', () => {
     await page.getByRole('button', { name: /صوت أو حركة أفزعتني/ }).click();
     await page.getByRole('button', { name: /الخطوة التالية/ }).click();
     await expect(page.getByText(/الخطوة 2 من 5/)).toBeVisible();
+    await waitForOpenSession(page, { step: 'sequence', stepIndex: 1 });
 
     await page.reload();
 
