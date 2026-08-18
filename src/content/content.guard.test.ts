@@ -9,6 +9,23 @@ function flattenKeys(tree: unknown, prefix = ''): string[] {
   );
 }
 
+/**
+ * Plural variants are not a key each.
+ *
+ * Arabic distinguishes six plural categories and English two, so a sentence
+ * with a count legitimately exists as `key_few` in one locale and not the
+ * other. Parity is about the sentence, which is the base key.
+ */
+const PLURAL_SUFFIX = /_(zero|one|two|few|many|other)$/;
+
+function baseKey(key: string): string {
+  return key.replace(PLURAL_SUFFIX, '');
+}
+
+function uniqueSorted(values: string[]): string[] {
+  return [...new Set(values)].sort();
+}
+
 function allStrings(value: unknown): string[] {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.flatMap(allStrings);
@@ -139,13 +156,44 @@ describe.each(LOCALES)('content for locale "%s"', (locale) => {
 describe('locale parity', () => {
   it('has identical ui key sets across locales', () => {
     const [first, ...rest] = LOCALES;
-    const reference = flattenKeys(CONTENT[first].ui).sort();
+    const reference = uniqueSorted(flattenKeys(CONTENT[first].ui).map(baseKey));
     for (const locale of rest) {
-      const other = flattenKeys(CONTENT[locale].ui).sort();
+      const other = uniqueSorted(flattenKeys(CONTENT[locale].ui).map(baseKey));
       const missing = reference.filter((key) => !other.includes(key));
       const extra = other.filter((key) => !reference.includes(key));
       expect(missing, `Missing in ${locale}:\n${missing.join('\n')}`).toEqual([]);
       expect(extra, `Extra in ${locale}:\n${extra.join('\n')}`).toEqual([]);
+    }
+  });
+
+  /**
+   * Comparing base keys is what lets Arabic carry six forms where English
+   * carries two, but it also means a missing form is invisible to the check
+   * above. i18next renders the raw key when a category has no string, so every
+   * category the language actually uses has to be present.
+   */
+  it('gives every counted string all the plural forms its language needs', () => {
+    const required: Record<Locale, string[]> = {
+      ar: ['zero', 'one', 'two', 'few', 'many', 'other'],
+      en: ['one', 'other'],
+    };
+
+    for (const locale of LOCALES) {
+      const forms = new Map<string, Set<string>>();
+      for (const key of flattenKeys(CONTENT[locale].ui)) {
+        const match = PLURAL_SUFFIX.exec(key);
+        if (!match) continue;
+        const base = baseKey(key);
+        forms.set(base, (forms.get(base) ?? new Set()).add(match[1]!));
+      }
+
+      const missing: string[] = [];
+      for (const [base, present] of forms) {
+        for (const category of required[locale]) {
+          if (!present.has(category)) missing.push(`${base}_${category}`);
+        }
+      }
+      expect(missing, `Missing plural forms in ${locale}:\n${missing.join('\n')}`).toEqual([]);
     }
   });
 
@@ -169,11 +217,15 @@ describe('locale parity', () => {
 
   it('uses the same interpolation placeholders in every locale', () => {
     const [first, ...rest] = LOCALES;
+    // Compared per base key as a union across plural variants: "a minute ago"
+    // drops the count that "{{count}} minutes ago" carries, in both languages.
     const placeholders = (locale: Locale) => {
       const map = new Map<string, string[]>();
       const walk = (node: unknown, path: string) => {
         if (typeof node === 'string') {
-          map.set(path, [...node.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]!).sort());
+          const key = baseKey(path);
+          const found = [...node.matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]!);
+          map.set(key, uniqueSorted([...(map.get(key) ?? []), ...found]));
           return;
         }
         if (typeof node === 'object' && node !== null) {

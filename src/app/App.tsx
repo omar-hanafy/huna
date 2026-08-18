@@ -1,4 +1,5 @@
-import { Navigate, Route, HashRouter as Router, Routes } from 'react-router';
+import { useEffect } from 'react';
+import { Navigate, Route, HashRouter as Router, Routes, useLocation } from 'react-router';
 import { AlertRoute } from '../features/alert/AlertRoute';
 import { CheckOnce } from '../routes/CheckOnce';
 import { CopingCardRoute } from '../routes/CopingCardRoute';
@@ -12,7 +13,24 @@ import { SettingsRoute } from '../routes/SettingsRoute';
 import { Today } from '../routes/Today';
 import { Tools } from '../routes/Tools';
 import { AppShell } from './AppShell';
+import { DocumentChrome } from './DocumentChrome';
 import { OnboardingGate } from './OnboardingGate';
+import { UpdateNotice } from './UpdateNotice';
+
+/**
+ * Every route change starts at the top of the page.
+ *
+ * Without this, a hash-router navigation keeps the previous screen's scroll
+ * position, so an alert step could open with its single instruction scrolled
+ * out of view - precisely when the user is least equipped to hunt for it.
+ */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 /**
  * Hash routing, deliberately.
@@ -27,6 +45,11 @@ import { OnboardingGate } from './OnboardingGate';
 export function App() {
   return (
     <Router>
+      <ScrollToTop />
+      <DocumentChrome />
+      {/* Mounted above the routes so the service worker registers on every
+          entry point, including onboarding and a cold #/alert start. */}
+      <UpdateNotice />
       <Routes>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route element={<OnboardingGate />}>

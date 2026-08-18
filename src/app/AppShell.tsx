@@ -1,11 +1,8 @@
 import { BookOpen, CalendarDays, Home as HomeIcon, Settings, Wind } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router';
-import { useDocumentChrome } from '../design-system/useDocumentChrome';
-import { usePreferences } from '../storage/hooks';
 import { useStorageContext } from '../storage/useStorage';
 import { FollowUpPrompt } from '../features/followUp/FollowUpPrompt';
-import { UpdateNotice } from './UpdateNotice';
 import './AppShell.css';
 
 const ITEMS = [
@@ -25,13 +22,14 @@ const ITEMS = [
  * removing it is a better answer than adding both.
  *
  * Progress is not here. It appears in settings only once the user asks for it.
+ *
+ * Document chrome and the update banner deliberately live above the router
+ * instead: both must also apply on onboarding and on a cold start at #/alert,
+ * neither of which mounts this shell.
  */
 export function AppShell() {
   const { t } = useTranslation();
-  const preferences = usePreferences();
   const { problem } = useStorageContext();
-
-  useDocumentChrome(preferences);
 
   return (
     <div className="app-shell">
@@ -40,8 +38,6 @@ export function AppShell() {
           {problem === 'quota' ? t('settings.storageFull') : t('settings.storageUnavailable')}
         </div>
       ) : null}
-
-      <UpdateNotice />
 
       <main className="app-shell__main">
         <Outlet />

@@ -38,7 +38,7 @@ test.describe('the alert flow', () => {
     }
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText('الفعل الصغير');
-    await page.getByRole('button', { name: /امشِ برفق لدقيقتين/ }).click();
+    await page.getByRole('button', { name: /المشي برفق لدقيقتين/ }).click();
 
     await expect(page.getByRole('heading', { level: 1 })).toContainText('أكملت التمرين');
     // No celebration: completion is quiet by design.
@@ -93,6 +93,35 @@ test.describe('the alert flow', () => {
     await expect(page.getByText(/الخطوة 1 من 5/)).toBeVisible();
   });
 
+  /**
+   * The reload that used to land on the red danger screen: answering "not
+   * sure", saying "I'm safe now", and starting an exercise must resume inside
+   * that exercise, not back in safety mode with the user's place lost.
+   */
+  test('resumes inside the exercise even when the answer was "not sure"', async ({ page }) => {
+    await page.goto('./#/alert');
+    await page.getByRole('button', { name: 'لست متأكدًا' }).click();
+    await page.getByRole('button', { name: /أنا في أمان الآن/ }).click();
+    await page.getByRole('button', { name: /صوت أو حركة أفزعتني/ }).click();
+    await page.getByRole('button', { name: /الخطوة التالية/ }).click();
+    await expect(page.getByText(/الخطوة 2 من 5/)).toBeVisible();
+
+    await page.reload();
+
+    await expect(page.getByText(/الخطوة 2 من 5/)).toBeVisible();
+  });
+
+  /** "This one isn't comfortable" used to be a dead button inside its own sequence. */
+  test('offers a different exercise rather than doing nothing', async ({ page }) => {
+    await page.goto('./#/alert');
+    await page.getByRole('button', { name: 'لا يوجد خطر مباشر محدد' }).click();
+    await page.getByRole('button', { name: /لم يتغيّر شيء/ }).click();
+    await page.getByRole('button', { name: /لا أعرف، أشعر فقط أنني على الحافة/ }).click();
+    await page.getByRole('button', { name: /هذا التمرين غير مريح/ }).click();
+
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('ما أقوى شيء');
+  });
+
   test('records "nothing right now" as a real choice, not a refusal', async ({ page }) => {
     await page.goto('./#/alert');
     await page.getByRole('button', { name: 'لا يوجد خطر مباشر محدد' }).click();
@@ -105,6 +134,9 @@ test.describe('the alert flow', () => {
 
     await page.getByRole('button', { name: 'لا شيء الآن' }).click();
     await expect(page.getByRole('heading', { level: 1 })).toContainText('أكملت التمرين');
+    // And the closing line does not thank them for a step they declined.
+    await expect(page.getByText(/اخترت ألا تحدد فعلًا الآن/)).toBeVisible();
+    await expect(page.getByText(/واخترت خطوتك التالية/)).toHaveCount(0);
   });
 });
 

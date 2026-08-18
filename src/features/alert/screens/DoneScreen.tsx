@@ -13,11 +13,15 @@ export function DoneScreen() {
   const { t } = useTranslation();
   const { state } = useAlertFlow();
 
+  // "Nothing right now" is a real answer, so the closing copy must not thank
+  // the user for a next step they deliberately declined to pick.
+  const declined = state.actionChosen && state.chosenAction === null;
+
   return (
     <section className="screen screen--narrow alert-done">
       <div className="stack stack--tight">
-        <h1>{t('alert.done.title')}</h1>
-        <p className="lede">{t('alert.done.body')}</p>
+        <h1>{declined ? t('alert.done.titleNoAction') : t('alert.done.title')}</h1>
+        <p className="lede">{declined ? t('alert.done.bodyNoAction') : t('alert.done.body')}</p>
       </div>
 
       {state.chosenAction ? (

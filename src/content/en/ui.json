@@ -24,7 +24,8 @@
     "closeMenu": "Close menu",
     "stepOf": "Step {{current}} of {{total}}",
     "optional": "Optional",
-    "noData": "Nothing recorded yet."
+    "noData": "Nothing recorded yet.",
+    "confirmDelete": "Press again to confirm deletion"
   },
   "nav": {
     "home": "Home",
@@ -68,13 +69,15 @@
       "trustedContacts": "People I trust",
       "noContacts": "No contacts added yet. You can add them in settings.",
       "verifiedOn": "Number verified on {{date}}",
-      "backToGrounding": "I'm safe now, continue grounding"
+      "backToGrounding": "I'm safe now, continue the exercise"
     },
     "seal": {
       "title": "You checked once",
       "body": "Unless something in your surroundings has changed, you do not need to check again right now.",
-      "checkedAt": "Checked at {{time}}, {{minutes}} minutes ago.",
-      "nothingChanged": "Nothing changed, continue grounding",
+      "checkedAt_zero": "Checked at {{time}}, less than a minute ago.",
+      "checkedAt_one": "Checked at {{time}}, a minute ago.",
+      "checkedAt_other": "Checked at {{time}}, {{count}} minutes ago.",
+      "nothingChanged": "Nothing changed, continue the exercise",
       "somethingChanged": "The situation changed, check again",
       "neverBlocked": "The choice is always yours. This app cannot see what is happening around you."
     },
@@ -86,7 +89,7 @@
       "title": "Come back to the present",
       "next": "Next step",
       "finish": "I finished",
-      "tooMuch": "This isn't helping, try a different one",
+      "tooMuch": "This exercise isn't comfortable, try a different one",
       "eyesOpen": "Keep your eyes open."
     },
     "action": {
@@ -109,6 +112,8 @@
     "done": {
       "title": "You completed the exercise and chose your next action.",
       "body": "Go back to your life now. You do not need to stay here.",
+      "titleNoAction": "You completed the exercise.",
+      "bodyNoAction": "You chose not to pick an action right now, and that is a perfectly valid choice. Go back to your life.",
       "exit": "Close the app"
     },
     "followUp": {
@@ -148,7 +153,8 @@
     },
     "country": {
       "question": "Which country are you in?",
-      "helper": "So the right emergency numbers appear. We will not show an unverified number."
+      "helper": "So the right emergency numbers appear. We will not show an unverified number.",
+      "other": "Another country (general guidance)"
     },
     "metrics": {
       "question": "Do you want to see numbers and statistics?",
@@ -237,7 +243,7 @@
       "see": "Notice {{count}} things you can see",
       "touch": "Notice {{count}} things you can feel",
       "hear": "Notice {{count}} sounds you can hear",
-      "smell": "Notice {{count}} smells",
+      "smell": "Notice two smells",
       "taste": "Notice one taste"
     },
     "senseHints": {
@@ -282,9 +288,12 @@
       "phone": "Phone",
       "exit": "Exit",
       "windows": "Windows",
-      "custom": "Something else"
+      "custom": "Something else",
+      "alert": "Your surroundings"
     },
-    "lastCheck": "Last check: {{target}}, {{minutes}} minutes ago.",
+    "lastCheck_zero": "Last check: {{target}}, less than a minute ago.",
+    "lastCheck_one": "Last check: {{target}}, a minute ago.",
+    "lastCheck_other": "Last check: {{target}}, {{count}} minutes ago.",
     "whatDidYouCheck": "What did you check?",
     "letThePassPass": "Nothing changed, I will let the urge pass",
     "realDanger": "If there is a genuine ongoing danger, do not train yourself to ignore it. Getting away and getting help come first."
@@ -328,13 +337,15 @@
     "title": "A kind look",
     "helper": "These numbers are rough signals. One high day does not undo a whole direction of learning.",
     "returnToLife": "Return-to-life rate",
-    "returnToLifeExplain": "The share of sessions after which you completed the action you chose within ten minutes.",
+    "returnToLifeExplain": "The share of sessions where the follow-up found you had completed the action you chose.",
     "tooEarly": "Too early for this number.",
     "tooEarlyExplain": "It appears after five sessions with an answered follow-up, so it is not volatile.",
     "medianRecovery": "Median time to return",
     "repeatChecks": "Repeat checks",
     "underTwoMinutes": "Sessions under two minutes",
-    "practisedThisWeek": "You practised {{count}} times this week. Which tool seemed most helpful?",
+    "practisedThisWeek_zero": "You have not practised this week yet. Which tool would you like to try?",
+    "practisedThisWeek_one": "You practised once this week. Which tool seemed most helpful?",
+    "practisedThisWeek_other": "You practised {{count}} times this week. Which tool seemed most helpful?",
     "chartTable": "Chart data table",
     "weeklyQuestions": {
       "title": "Three questions that matter more than the chart",
@@ -362,7 +373,8 @@
     "breathingEnabled": "Show breathing steps",
     "lockoutWindow": "Check reminder window",
     "lockoutOff": "Off",
-    "lockoutMinutes": "{{minutes}} minutes",
+    "lockoutMinutes_one": "{{count}} minute",
+    "lockoutMinutes_other": "{{count}} minutes",
     "lockoutExplain": "If you open the check again within this window, we will remind you that you already checked. We will never block you.",
     "export": "Export a backup",
     "import": "Import a backup",
@@ -372,7 +384,8 @@
     "importFailure": "Could not read the file. Make sure it is a JSON backup exported from Huna.",
     "resetDone": "Data reset to the beginning.",
     "storageFull": "Could not save: browser storage is full. Export a backup, then clear old data.",
-    "storageUnavailable": "Storage is unavailable in this browser. What you write now may not be saved."
+    "storageUnavailable": "Storage is unavailable in this browser. What you write now may not be saved.",
+    "actionFailed": "That did not complete; storage is the likely reason."
   },
   "boundary": {
     "title": "Huna is a self-help tool, not a diagnosis or medical treatment",

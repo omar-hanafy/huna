@@ -51,6 +51,30 @@ export function markMissed(session: AlertSession): AlertSession {
   return { ...session, followUpMissed: true };
 }
 
+/**
+ * The other sessions one answer stands in for.
+ *
+ * Two episodes inside an hour produce two due follow-ups, and asking twice in a
+ * row turns a check-in into an interrogation. Answering closes the rest: they
+ * leave the return-to-life denominator rather than counting as failures, which
+ * is exactly how a window that closed unattended is treated.
+ *
+ * A session whose window has not opened yet is left alone. It is not covered by
+ * this answer, it simply has not been asked about, and closing it here would
+ * mean an episode that ended a minute ago never gets its own follow-up.
+ */
+export function coveredByAnswer(
+  sessions: readonly AlertSession[],
+  answered: AlertSession,
+  now: Date,
+): AlertSession[] {
+  return sessions.filter((session) => {
+    if (session.id === answered.id) return false;
+    const state = followUpState(session, now);
+    return state === 'due' || state === 'expired';
+  });
+}
+
 export interface FollowUpAnswer {
   activationAfter: number;
   actionCompleted: AlertSession['actionCompleted'];

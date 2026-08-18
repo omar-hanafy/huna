@@ -1,15 +1,30 @@
+/*
+ * The printed mirror.
+ *
+ * A textarea prints only the lines that happen to be scrolled into view, so a
+ * long answer came out truncated on paper. Each field therefore renders twice:
+ * the editable control on screen, and a plain block that only print sees.
+ */
+.coping-card__printed {
+  display: none;
+  white-space: pre-wrap;
+}
+
 /* Printing matters: a card that still works when the phone is dead. */
 @media print {
   .tabbar,
-  .coping-card .button {
+  .update-notice,
+  .storage-banner,
+  .coping-card .button,
+  .coping-card .textarea {
     display: none;
   }
 
-  .coping-card .textarea {
-    border: 0;
+  .coping-card__printed {
+    display: block;
+    min-block-size: 1.5rem;
+    padding-block-end: var(--space-1);
     border-block-end: 1px solid #000;
-    border-radius: 0;
-    resize: none;
   }
 
   .app-shell__main {

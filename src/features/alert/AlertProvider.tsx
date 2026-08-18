@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CONTENT, type Locale } from '../../content';
 import {
   alertFlowReducer,
+  isResumable,
   resumeFrom,
   startAlertFlow,
   toSession,
@@ -14,11 +15,14 @@ import { lockoutState, type LockoutState } from '../../core/safety-window';
 import { createId } from '../../lib/id';
 import { useNow } from '../../lib/useNow';
 import { useLastSafetyCheck, usePreferences, useWrite } from '../../storage/hooks';
-import { useStorage } from '../../storage/useStorage';
-import type { AlertSession } from '../../storage/types';
+import { useStorage, useStorageContext } from '../../storage/useStorage';
+import { createDefaultPreferences, type AlertSession } from '../../storage/types';
 import { AlertContext, type AlertContextValue } from './AlertContext';
 
 const EMPTY_LOCKOUT: LockoutState = { active: false, minutesAgo: null, lastCheck: null };
+
+/** Stands in only for the frames before the stored preferences arrive. */
+const DEFAULTS = createDefaultPreferences(new Date(0));
 
 function blankSession(id: string, startedAt: string): AlertSession {
   return {
@@ -49,12 +53,22 @@ function blankSession(id: string, startedAt: string): AlertSession {
  * exists to serve React.
  */
 export function AlertProvider({ children }: { children: ReactNode }) {
-  const preferences = usePreferences();
-  const lastCheck = useLastSafetyCheck();
+  const storedPreferences = usePreferences();
+  const storedLastCheck = useLastSafetyCheck();
   const storage = useStorage();
+  const { problem } = useStorageContext();
   const write = useWrite();
   const { i18n } = useTranslation();
   const now = useNow(60_000);
+
+  // Unreadable storage must not hold the flow behind a spinner. An episode is
+  // not the moment to tell someone their browser is misconfigured, so the flow
+  // runs on defaults and simply fails to persist; the banner says the rest.
+  const preferences = useMemo(
+    () => storedPreferences ?? (problem ? createDefaultPreferences(new Date()) : undefined),
+    [storedPreferences, problem],
+  );
+  const lastCheck = problem ? (storedLastCheck ?? null) : storedLastCheck;
 
   const [state, setState] = useState<AlertFlowState>(() =>
     startAlertFlow({ sessionId: createId(), startedAt: new Date().toISOString(), lockoutActive: false }),
@@ -69,14 +83,18 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     void (async () => {
-      const open = await storage.getOpenAlertSession();
+      // A read failure here is not fatal: start a fresh episode instead.
+      const open = await storage.getOpenAlertSession().catch(() => null);
 
-      const lockout = lockoutState(lastCheck, new Date(), preferences.lockoutMinutes);
+      const startedAt = new Date();
+      const lockout = lockoutState(lastCheck, startedAt, preferences.lockoutMinutes);
 
-      if (!cancelled && open) {
-        // A session left open means the app closed mid-episode. Pick it up
-        // where it was, unless a check was logged very recently and grounding
-        // has not started, in which case the reminder comes first.
+      // A session left open means the app closed mid-episode. Pick it up where
+      // it was, but only while it is still plausibly the same episode: a record
+      // from last week would otherwise reopen on a step whose context is long
+      // gone. Stale sessions keep `endedAt: null` - the app never invents an
+      // ending it did not witness.
+      if (!cancelled && open && isResumable(open, startedAt)) {
         sessionRef.current = open;
         setState(resumeFrom(open, lockout.active));
       } else if (!cancelled) {
@@ -168,9 +186,13 @@ export function AlertProvider({ children }: { children: ReactNode }) {
     setState(fresh);
   }, []);
 
+  // `ready` is only true once preferences resolved, so the screens below can
+  // rely on this being the real thing rather than a placeholder.
+  const resolved = preferences ?? DEFAULTS;
+
   const value = useMemo<AlertContextValue>(
-    () => ({ state, dispatch, sequence, lockout, finish, restart, ready }),
-    [state, dispatch, sequence, lockout, finish, restart, ready],
+    () => ({ state, dispatch, sequence, preferences: resolved, lockout, finish, restart, ready }),
+    [state, dispatch, sequence, resolved, lockout, finish, restart, ready],
   );
 
   return <AlertContext.Provider value={value}>{children}</AlertContext.Provider>;

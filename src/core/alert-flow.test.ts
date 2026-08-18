@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import type { AlertSession } from '../storage/types';
 import {
+  RESUME_WINDOW_HOURS,
   alertFlowReducer,
+  isResumable,
   isTerminal,
   resumeFrom,
   routeForStep,
@@ -302,6 +304,50 @@ describe('resumeFrom', () => {
     expect(resumeFrom({ ...base, activationBefore: 7 }).activationBefore).toBe(7);
   });
 
+  /**
+   * The bug this pins: someone answered "not sure", read the safety screen,
+   * pressed "I'm safe now", started an exercise, and reloaded. The old ordering
+   * checked the safety answer before the chosen state and dropped them back on
+   * the red danger screen, mid-episode, with their place in the sequence lost.
+   */
+  it('resumes at the sequence even when the safety answer was not "no"', () => {
+    const state = resumeFrom({ ...base, safetyAnswer: 'unsure', stateId: 'startled', stepIndex: 2 });
+    expect(state.step).toBe('sequence');
+    expect(state.stepIndex).toBe(2);
+  });
+
+  it('resumes at the step the user was on', () => {
+    expect(resumeFrom({ ...base, safetyAnswer: 'no', stateId: 'startled', stepIndex: 3 }).stepIndex).toBe(3);
+  });
+
+  /** Sessions written before the step was recorded resume at the beginning. */
+  it('starts the sequence over when the record predates step tracking', () => {
+    expect(resumeFrom({ ...base, safetyAnswer: 'no', stateId: 'startled' }).stepIndex).toBe(0);
+  });
+
+  /**
+   * The recorded screen is the truth. After "try a different exercise" the
+   * chosen state is cleared again, so deriving from the safety answer alone
+   * would drop someone who answered "not sure" back onto the danger screen
+   * they had already left behind.
+   */
+  it('resumes on the recorded screen rather than re-deriving one', () => {
+    const afterChangingExercise = { ...base, safetyAnswer: 'unsure' as const, step: 'state' as const };
+    expect(resumeFrom(afterChangingExercise).step).toBe('state');
+  });
+
+  it('resumes on the action screen when that is where the user was', () => {
+    expect(resumeFrom({ ...base, safetyAnswer: 'no', stateId: 'startled', step: 'action' }).step).toBe(
+      'action',
+    );
+  });
+
+  /** A recorded sequence with no state to run is not a screen that can render. */
+  it('ignores a recorded sequence step with no chosen state', () => {
+    const impossible = { ...base, safetyAnswer: 'no' as const, step: 'sequence' as const };
+    expect(resumeFrom(impossible).step).toBe('state');
+  });
+
   describe('with a recent check', () => {
     /**
      * Leaving and coming back to check again is the compulsion the seal exists
@@ -384,6 +430,100 @@ describe('toSession', () => {
     expect(resumed.step).toBe('sequence');
     expect(resumed.stateId).toBe('sleepless');
     expect(resumed.sessionId).toBe(state.sessionId);
+  });
+});
+
+describe('changing the exercise', () => {
+  /**
+   * "This one isn't comfortable" used to re-choose the generic sequence, which
+   * from inside that very sequence changed nothing at all: a dead button at the
+   * worst possible moment.
+   */
+  it('returns to the state picker instead of a fixed sequence', () => {
+    const state = run(
+      fresh(),
+      { type: 'ANSWER_SAFETY', answer: 'no' },
+      { type: 'SEAL_CONTINUE' },
+      { type: 'CHOOSE_STATE', stateId: 'unsure' },
+      { type: 'NEXT_SEQUENCE_STEP', stepCount: 5 },
+      { type: 'CHANGE_EXERCISE' },
+    );
+    expect(state.step).toBe('state');
+    expect(state.stateId).toBeNull();
+    expect(state.stepIndex).toBe(0);
+  });
+
+  /** Clearing the state is what keeps a reload honest about where the user is. */
+  it('resumes at the picker after a reload', () => {
+    const state = run(
+      fresh(),
+      { type: 'ANSWER_SAFETY', answer: 'no' },
+      { type: 'CHOOSE_STATE', stateId: 'unsure' },
+      { type: 'CHANGE_EXERCISE' },
+    );
+    const session: AlertSession = {
+      id: state.sessionId,
+      startedAt: state.startedAt,
+      endedAt: null,
+      safetyAnswer: state.safetyAnswer,
+      stateId: state.stateId,
+      stepIndex: state.stepIndex,
+      activationBefore: null,
+      activationAfter: null,
+      chosenAction: null,
+      actionCompleted: null,
+      whatHelped: null,
+      followUpMissed: false,
+      followUpAnsweredAt: null,
+    };
+    expect(resumeFrom(session).step).toBe('state');
+  });
+});
+
+describe('isResumable', () => {
+  const open: AlertSession = {
+    id: 'abc',
+    startedAt: '2026-08-17T09:00:00.000Z',
+    endedAt: null,
+    safetyAnswer: 'no',
+    stateId: 'startled',
+    activationBefore: null,
+    activationAfter: null,
+    chosenAction: null,
+    actionCompleted: null,
+    whatHelped: null,
+    followUpMissed: false,
+    followUpAnsweredAt: null,
+  };
+
+  it('resumes a session from minutes ago', () => {
+    expect(isResumable(open, new Date('2026-08-17T09:20:00.000Z'))).toBe(true);
+  });
+
+  it('resumes right up to the edge of the window', () => {
+    const justInside = new Date('2026-08-17T09:00:00.000Z');
+    justInside.setHours(justInside.getHours() + RESUME_WINDOW_HOURS);
+    justInside.setMinutes(justInside.getMinutes() - 1);
+    expect(isResumable(open, justInside)).toBe(true);
+  });
+
+  /** A record from last week would restore a stale reading and a stale place. */
+  it('abandons a session older than the window', () => {
+    expect(isResumable(open, new Date('2026-08-24T09:00:00.000Z'))).toBe(false);
+  });
+
+  it('never resumes a session that already ended', () => {
+    const ended = { ...open, endedAt: '2026-08-17T09:05:00.000Z' };
+    expect(isResumable(ended, new Date('2026-08-17T09:20:00.000Z'))).toBe(false);
+  });
+
+  /** A clock moved backwards must not make an old session look current. */
+  it('rejects a session that claims to start in the future', () => {
+    expect(isResumable(open, new Date('2026-08-17T08:00:00.000Z'))).toBe(false);
+  });
+
+  it('rejects a session with an unreadable start time', () => {
+    expect(isResumable({ ...open, startedAt: 'not a date' }, new Date())).toBe(false);
   });
 });
 

@@ -4,6 +4,7 @@ import {
   FOLLOW_UP_MAX_MINUTES,
   FOLLOW_UP_MIN_MINUTES,
   applyFollowUp,
+  coveredByAnswer,
   dismissFollowUp,
   expiredFollowUps,
   followUpState,
@@ -153,6 +154,57 @@ describe('applyFollowUp', () => {
     const original = session();
     applyFollowUp(original, { activationAfter: 3, actionCompleted: 'yes', whatHelped: null }, new Date());
     expect(original.activationAfter).toBeNull();
+  });
+});
+
+describe('coveredByAnswer', () => {
+  const at = minutesAfterEnd(20);
+
+  /**
+   * Two hard hours produced two prompts back to back, which is an
+   * interrogation, not a check-in. One answer speaks for the cluster.
+   */
+  it('closes every other session whose window is open', () => {
+    const answered = session();
+    const other = session();
+    const covered = coveredByAnswer([answered, other], answered, at);
+    expect(covered.map((item) => item.id)).toEqual([other.id]);
+  });
+
+  it('leaves already answered or already missed sessions alone', () => {
+    const answered = session();
+    const done = session({ followUpAnsweredAt: '2026-08-17T09:30:00.000Z' });
+    const missed = session({ followUpMissed: true });
+    expect(coveredByAnswer([answered, done, missed], answered, at)).toEqual([]);
+  });
+
+  /** An episode still under way has no follow-up to close. */
+  it('ignores sessions that have not ended', () => {
+    const answered = session();
+    const running = session({ endedAt: null });
+    expect(coveredByAnswer([answered, running], answered, at)).toEqual([]);
+  });
+
+  /**
+   * An episode that ended a minute ago has not been asked about, and closing it
+   * here would mean it never is. It is not covered; it is simply next.
+   */
+  it('leaves a session whose window has not opened yet', () => {
+    const answered = session();
+    const justEnded = session({ endedAt: at.toISOString() });
+    expect(coveredByAnswer([answered, justEnded], answered, at)).toEqual([]);
+  });
+
+  /**
+   * Closed as missed, never as a failure: a session nobody was asked about must
+   * leave the return-to-life denominator rather than counting against the user.
+   */
+  it('marks the others missed rather than incomplete', () => {
+    const answered = session();
+    const other = session();
+    const closed = coveredByAnswer([answered, other], answered, at).map(markMissed);
+    expect(closed[0]?.followUpMissed).toBe(true);
+    expect(closed[0]?.actionCompleted).toBeNull();
   });
 });
 

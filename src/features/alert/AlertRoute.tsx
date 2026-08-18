@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { routeForStep } from '../../core/alert-flow';
 import { AlertProvider } from './AlertProvider';
@@ -31,6 +31,31 @@ function AlertSteps() {
     if (!ready) return;
     if (location.pathname !== target) void navigate(target, { replace: true });
   }, [ready, target, location.pathname, navigate]);
+
+  /**
+   * Each step moves focus to its own heading.
+   *
+   * A hash-router navigation leaves focus wherever the last button was, so a
+   * screen reader kept announcing the old screen while a new one was on
+   * display. The sequence screen focuses its own instruction, so nothing
+   * happens here when it has no heading of its own.
+   *
+   * The first step is deliberately exempt: on a fresh open the page already
+   * starts at the top, and grabbing focus then would yank it away from someone
+   * who has already started tabbing.
+   */
+  const lastStep = useRef<string | null>(null);
+  useEffect(() => {
+    if (!ready) return;
+    const previous = lastStep.current;
+    lastStep.current = state.step;
+    if (previous === null || previous === state.step) return;
+
+    const heading = document.querySelector<HTMLElement>('.screen h1');
+    if (!heading) return;
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+  }, [ready, state.step]);
 
   if (!ready) return <div className="screen" aria-busy="true" />;
 

@@ -1,28 +1,37 @@
 /**
- * Stands in for `virtual:pwa-register/react`, which only exists inside a Vite
- * build. Aliased in vitest.config.ts so UpdateNotice can be rendered in tests
- * rather than sitting permanently uncovered.
+ * Stands in for `virtual:pwa-register`, which only exists inside a Vite build.
+ * Aliased in vitest.config.ts so the update watcher and its banner can be
+ * exercised in tests rather than sitting permanently uncovered.
  */
-import { useState } from 'react';
-
-export interface RegisterSWState {
-  needRefresh: [boolean, (value: boolean) => void];
-  offlineReady: [boolean, (value: boolean) => void];
-  updateServiceWorker: (reload?: boolean) => Promise<void>;
+export interface RegisterSWOptions {
+  immediate?: boolean;
+  onNeedRefresh?: () => void;
+  onNeedReload?: () => void;
+  onOfflineReady?: () => void;
+  onRegisterError?: (error: unknown) => void;
 }
 
-/** Tests set this before rendering to choose what the hook reports. */
+/**
+ * Records what the app asked for. Tests read `options` to fire the callbacks a
+ * real service-worker lifecycle would fire, and `updates` to assert that
+ * accepting an update actually asked the worker to take over.
+ */
 export const pwaStub = {
-  needRefresh: false,
-  updateServiceWorker: (_reload?: boolean): Promise<void> => Promise.resolve(),
+  registered: 0,
+  options: null as RegisterSWOptions | null,
+  updates: [] as (boolean | undefined)[],
+  reset(): void {
+    pwaStub.registered = 0;
+    pwaStub.options = null;
+    pwaStub.updates = [];
+  },
 };
 
-export function useRegisterSW(): RegisterSWState {
-  const [needRefresh, setNeedRefresh] = useState(pwaStub.needRefresh);
-  const [offlineReady, setOfflineReady] = useState(false);
-  return {
-    needRefresh: [needRefresh, setNeedRefresh],
-    offlineReady: [offlineReady, setOfflineReady],
-    updateServiceWorker: pwaStub.updateServiceWorker,
+export function registerSW(options: RegisterSWOptions = {}): (reloadPage?: boolean) => Promise<void> {
+  pwaStub.registered += 1;
+  pwaStub.options = options;
+  return (reloadPage?: boolean) => {
+    pwaStub.updates.push(reloadPage);
+    return Promise.resolve();
   };
 }

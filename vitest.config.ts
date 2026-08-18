@@ -6,9 +6,9 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      // Only exists inside a Vite build; stubbed so UpdateNotice is testable
-      // rather than permanently uncovered.
-      'virtual:pwa-register/react': fileURLToPath(new URL('./src/test/pwaRegisterStub.ts', import.meta.url)),
+      // Only exists inside a Vite build; stubbed so the update watcher and its
+      // banner are testable rather than permanently uncovered.
+      'virtual:pwa-register': fileURLToPath(new URL('./src/test/pwaRegisterStub.ts', import.meta.url)),
     },
   },
   test: {

@@ -209,4 +209,78 @@ describe('migrateFromSakinaV1', () => {
     const target = freshStorage();
     expect((await target.importAll(bundle)).ok).toBe(true);
   });
+
+  /**
+   * v1 wrote whatever string it was holding. A single `2026-8-3` copied through
+   * unchanged satisfies nothing in the new schema, and the user only finds out
+   * when their backup refuses to import, long after the data is gone.
+   */
+  it('repairs loose dates and timestamps rather than storing them', async () => {
+    const loose = JSON.stringify({
+      version: 1,
+      startedAt: 'sometime in July',
+      days: {
+        '2026-8-3': {
+          date: '2026-8-3',
+          week: 1,
+          tasks: {},
+          vigilance: 5,
+          sleepHours: 7,
+          recoveryMinutes: 10,
+          note: 'أول يوم',
+          checkIns: [{ id: 'c1', createdAt: '2026-08-03 09:00', vigilance: 4 }],
+        },
+      },
+      journal: [
+        {
+          id: 'j1',
+          createdAt: 'not a date at all',
+          trigger: 'صوت',
+          prediction: '',
+          evidenceDanger: '',
+          evidenceAlarm: '',
+          response: '',
+          recoveryMinutes: null,
+          intensityBefore: 6,
+          intensityAfter: 4,
+        },
+      ],
+    });
+
+    const result = await migrateFromSakinaV1(loose, storage);
+    expect(result.status).toBe('migrated');
+
+    // Filed under a real date key, and the note survived.
+    expect((await storage.getDay('2026-08-03'))?.note).toBe('أول يوم');
+    // The journal entry kept its text rather than being thrown away.
+    expect((await storage.getJournalEntries())[0]?.trigger).toBe('صوت');
+
+    // And the whole store still exports into something that imports back.
+    const bundle = await storage.exportAll();
+    expect((await freshStorage().importAll(bundle)).ok).toBe(true);
+  });
+
+  /** A date that is not a date at all is dropped, not stored as one. */
+  it('drops a day whose key cannot be read as a date', async () => {
+    const nonsense = JSON.stringify({
+      version: 1,
+      days: {
+        yesterday: {
+          date: 'yesterday',
+          week: 1,
+          tasks: {},
+          vigilance: null,
+          sleepHours: null,
+          recoveryMinutes: null,
+          note: '',
+          checkIns: [],
+        },
+      },
+      journal: [],
+    });
+
+    const result = await migrateFromSakinaV1(nonsense, storage);
+    expect(result.days).toBe(0);
+    expect(await storage.getDays()).toEqual([]);
+  });
 });

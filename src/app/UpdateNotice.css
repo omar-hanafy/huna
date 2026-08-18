@@ -1,0 +1,19 @@
+/*
+ * Lives with the component rather than in AppShell.css: the notice now mounts
+ * above the routes, so its styles must load even on screens that never render
+ * the shell (onboarding, a cold start at #/alert).
+ */
+.update-notice {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-calm);
+  border-block-end: 1px solid var(--border);
+  font-size: var(--text-sm);
+}

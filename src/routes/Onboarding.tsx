@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import { prefersReducedMotion } from '../design-system/useDocumentChrome';
 import { createId } from '../lib/id';
-import { useWrite } from '../storage/hooks';
+import { usePreferences, useWrite } from '../storage/hooks';
 import type { TrustedContact, UserPreferences } from '../storage/types';
 import './Onboarding.css';
 
@@ -24,9 +24,10 @@ const ORDER: Step[] = ['welcome', 'breathing', 'contacts', 'country', 'metrics',
  * mid-episode should be able to reach the alert flow immediately.
  */
 export function Onboarding() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const write = useWrite();
+  const preferences = usePreferences();
 
   const [step, setStep] = useState<Step>('welcome');
   const [breathing, setBreathing] = useState<UserPreferences['breathing']>('unsure');
@@ -47,11 +48,29 @@ export function Onboarding() {
         showMetrics,
         reducedMotion: prefersReducedMotion(),
         onboardingCompletedAt: new Date().toISOString(),
-        programStartedAt: new Date().toISOString(),
+        // Kept if it already exists: someone who reopens this screen has been
+        // on the program for weeks, and restarting the clock would silently
+        // move them back to week one.
+        programStartedAt: preferences?.programStartedAt ?? new Date().toISOString(),
       }),
     );
     void navigate('/', { replace: true });
   };
+
+  const chooseLanguage = (locale: UserPreferences['locale']) => {
+    void i18n.changeLanguage(locale);
+    void write((storage) => storage.savePreferences({ locale }));
+  };
+
+  /**
+   * Onboarding runs once.
+   *
+   * Reaching #/onboarding again after finishing it - a stale tab, a bookmark,
+   * the back button - used to be one tap from wiping the trusted contacts,
+   * country, and breathing answer, because finishing writes fresh defaults over
+   * everything. There is nothing here to re-do, so there is nothing to show.
+   */
+  if (preferences?.onboardingCompletedAt) return <Navigate to="/" replace />;
 
   const addContact = () => {
     if (!draftName.trim() || !draftNumber.trim()) return;
@@ -76,6 +95,27 @@ export function Onboarding() {
         <section className="stack">
           <h1>{t('onboarding.welcome.title')}</h1>
           <p className="lede">{t('onboarding.welcome.body')}</p>
+          {/* Offered first, in both languages at once: someone who does not
+              read Arabic should not have to finish an Arabic setup to find the
+              switch in settings. */}
+          <div className="onboarding__language">
+            <button
+              type="button"
+              className="button button--quiet"
+              aria-pressed={i18n.language !== 'en'}
+              onClick={() => chooseLanguage('ar')}
+            >
+              العربية
+            </button>
+            <button
+              type="button"
+              className="button button--quiet"
+              aria-pressed={i18n.language === 'en'}
+              onClick={() => chooseLanguage('en')}
+            >
+              English
+            </button>
+          </div>
           <button
             type="button"
             className="button button--primary button--full"
@@ -122,7 +162,8 @@ export function Onboarding() {
             {contacts.map((contact) => (
               <li key={contact.id}>
                 <span>
-                  {contact.name} <span className="muted">{contact.number}</span>
+                  {/* Isolated: a number beside Arabic text reorders its groups. */}
+                  {contact.name} <bdi className="muted">{contact.number}</bdi>
                 </span>
                 <button
                   type="button"
@@ -182,7 +223,7 @@ export function Onboarding() {
               onChange={(event) => setCountry(event.target.value)}
             >
               <option value="EG">مصر / Egypt</option>
-              <option value="OTHER">{t('common.optional')}</option>
+              <option value="OTHER">{t('onboarding.country.other')}</option>
             </select>
           </div>
           <button

@@ -14,6 +14,8 @@ import type {
   ValueCommitment,
 } from './types';
 
+export type DayPatch = Partial<Omit<DayRecord, 'date'>>;
+
 /**
  * The single boundary between the app and persistence.
  *
@@ -44,7 +46,15 @@ export interface AppStorage {
   getDay(date: string): Promise<DayRecord | null>;
   getDays(range?: DateRange): Promise<DayRecord[]>;
   saveDay(record: DayRecord): Promise<void>;
-  updateDay(date: string, patch: Partial<Omit<DayRecord, 'date'>>): Promise<DayRecord>;
+  /**
+   * Merges a patch into today's record, creating it if needed.
+   *
+   * Pass a function when the new value depends on the old one (toggling a task,
+   * appending a check-in). It runs inside the same transaction as the write, so
+   * two fields edited moments apart cannot overwrite each other with a stale
+   * copy of the record.
+   */
+  updateDay(date: string, patch: DayPatch | ((current: DayRecord) => DayPatch)): Promise<DayRecord>;
 
   // The alert flow
   saveAlertSession(session: AlertSession): Promise<void>;

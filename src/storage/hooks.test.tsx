@@ -14,7 +14,8 @@ import {
   useLastSafetyCheck,
   usePreferences,
 } from './hooks';
-import { createDayRecord } from './types';
+import { useStorageContext } from './useStorage';
+import { StorageUnavailableError, createDayRecord } from './types';
 
 let counter = 0;
 function freshStorage(): IndexedDbStorage {
@@ -61,6 +62,25 @@ describe('live read hooks', () => {
     await waitFor(() => expect(screen.getByTestId('sleep')).toHaveTextContent('7'));
   });
 
+  /**
+   * A browser with IndexedDB blocked used to land on the crash screen, because
+   * the rejection travelled through render. It belongs in the storage banner:
+   * the app still works, it just cannot remember anything.
+   */
+  it('absorbs a known storage failure instead of throwing through render', async () => {
+    const storage = freshStorage();
+    vi.spyOn(storage, 'getPreferences').mockRejectedValue(new StorageUnavailableError());
+
+    function Probe() {
+      const preferences = usePreferences();
+      const { problem } = useStorageContext();
+      return <span data-testid="state">{`${preferences?.locale ?? 'none'}|${problem ?? 'ok'}`}</span>;
+    }
+
+    wrap(storage, <Probe />);
+    await waitFor(() => expect(screen.getByTestId('state')).toHaveTextContent('none|unavailable'));
+  });
+
   it('the remaining read hooks resolve without error', async () => {
     const storage = freshStorage();
 
@@ -92,13 +112,22 @@ describe('useDebouncedWrite', () => {
   function Editor() {
     const { schedule } = useDebouncedWrite(50);
     return (
-      <input
-        aria-label="note"
-        onChange={(event) => {
-          const value = event.target.value;
-          schedule((instance) => instance.updateDay('2026-08-17', { note: value }));
-        }}
-      />
+      <>
+        <input
+          aria-label="note"
+          onChange={(event) => {
+            const value = event.target.value;
+            schedule('note', (instance) => instance.updateDay('2026-08-17', { note: value }));
+          }}
+        />
+        <input
+          aria-label="sleep"
+          onChange={(event) => {
+            const value = Number(event.target.value);
+            schedule('sleepHours', (instance) => instance.updateDay('2026-08-17', { sleepHours: value }));
+          }}
+        />
+      </>
     );
   }
 
@@ -139,5 +168,38 @@ describe('useDebouncedWrite', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 80));
     expect(updateDay).not.toHaveBeenCalled();
+  });
+
+  /** Closing the PWA is not a save button, but it has to behave like one. */
+  it('flushes a pending write when the page is hidden', async () => {
+    const storage = freshStorage();
+    const updateDay = vi.spyOn(storage, 'updateDay');
+
+    wrap(storage, <Editor />);
+    await userEvent.type(screen.getByLabelText('note'), 'x', { delay: null });
+
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('hidden');
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    await waitFor(() => expect(updateDay).toHaveBeenCalledTimes(1));
+  });
+
+  /**
+   * Real data loss, seen in the browser: the evening log's sleep field and its
+   * note were typed seconds apart, and only the note survived. One pending slot
+   * meant the second field's write replaced the first field's outright.
+   */
+  it('keeps both fields when two are edited inside one window', async () => {
+    const storage = freshStorage();
+
+    wrap(storage, <Editor />);
+    await userEvent.type(screen.getByLabelText('sleep'), '7', { delay: null });
+    await userEvent.type(screen.getByLabelText('note'), 'ليلة هادئة', { delay: null });
+
+    await waitFor(async () => {
+      const day = await storage.getDay('2026-08-17');
+      expect(day?.note).toBe('ليلة هادئة');
+      expect(day?.sleepHours).toBe(7);
+    });
   });
 });

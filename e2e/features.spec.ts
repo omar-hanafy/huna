@@ -92,7 +92,7 @@ test.describe('progress', () => {
 
   test('withholds the rate until there is enough data to be meaningful', async ({ page }) => {
     await page.goto('./#/progress');
-    await expect(page.getByText('لسه بدري على الرقم ده.')).toBeVisible();
+    await expect(page.getByText('ما زال مبكرًا على هذا الرقم.')).toBeVisible();
   });
 
   test('can be hidden entirely without deleting anything', async ({ page }) => {
@@ -151,5 +151,105 @@ test.describe('settings', () => {
     const erase = page.getByRole('button', { name: 'مسح كل البيانات' });
     await expect(erase).toHaveClass(/destructive-action/);
     await expect(erase).not.toHaveClass(/danger-action/);
+  });
+
+  /**
+   * A number changes, or a person leaves someone's life. Trusted contacts used
+   * to be editable during onboarding only, which left the safety screen
+   * offering a number the user could no longer correct.
+   */
+  test('lets a trusted contact be added and removed after onboarding', async ({ page }) => {
+    await page.goto('./#/settings');
+    await page.getByLabel('الاسم').fill('أمي');
+    await page.getByLabel('الرقم').fill('0100000000');
+    await page.getByRole('button', { name: 'إضافة' }).click();
+
+    await page.goto('./#/alert');
+    await page.getByRole('button', { name: 'نعم، قد يكون هناك خطر' }).click();
+    await expect(page.getByRole('link', { name: /اتصال بـ أمي/ })).toBeVisible();
+
+    await page.goto('./#/settings');
+    await page.getByRole('button', { name: 'حذف' }).click();
+    await expect(page.getByText('0100000000')).toHaveCount(0);
+  });
+});
+
+test.describe('the daily routine', () => {
+  test.beforeEach(start);
+
+  /**
+   * Real data loss: two fields edited seconds apart shared one pending write,
+   * so the first one was discarded without a trace.
+   */
+  test('keeps every evening field that was filled in', async ({ page }) => {
+    await page.goto('./#/today');
+    await page.getByLabel('ساعات النوم').fill('7');
+    await page.getByLabel('مدة العودة بعد موجة').fill('30');
+    await page.getByLabel('أكثر شيء ساعدني اليوم').fill('المشي');
+
+    // The screen promises it saves by itself, so wait for the store rather than
+    // for a stopwatch: under load a fixed pause is either too short or a lie.
+    await expect(page.getByText('محفوظ تلقائيًا على جهازك')).toBeVisible();
+    await page.waitForFunction(async () => {
+      const open = indexedDB.open('huna');
+      const db = await new Promise<IDBDatabase>((resolve) => {
+        open.onsuccess = () => resolve(open.result);
+      });
+      const days = await new Promise<{ sleepHours: number | null; recoveryMinutes: number | null; note: string }[]>(
+        (resolve) => {
+          const request = db.transaction('days', 'readonly').objectStore('days').getAll();
+          request.onsuccess = () => resolve(request.result);
+        },
+      );
+      db.close();
+      return days.some((day) => day.sleepHours === 7 && day.recoveryMinutes === 30 && day.note === 'المشي');
+    });
+
+    await page.goto('./#/');
+    await page.goto('./#/today');
+
+    // A generous timeout on purpose: the fields fill in from a fresh IndexedDB
+    // read after two navigations, and on a machine running three browsers at
+    // once that read is slow rather than broken.
+    const restored = { timeout: 15_000 };
+    await expect(page.getByLabel('ساعات النوم')).toHaveValue('7', restored);
+    await expect(page.getByLabel('مدة العودة بعد موجة')).toHaveValue('30', restored);
+    await expect(page.getByLabel('أكثر شيء ساعدني اليوم')).toHaveValue('المشي', restored);
+  });
+
+  /** Home and Today counted the same routine differently: "1 of 6" against "1 of 3". */
+  test('shows the same count on the home screen as on the day itself', async ({ page }) => {
+    await page.goto('./#/today');
+    await page.getByRole('button', { name: /يوم مزدحم/ }).click();
+    const counter = page.locator('.today__head .step-count');
+    await expect(counter).toHaveText(/0 من 4/);
+
+    await page.goto('./#/');
+    await expect(page.locator('.home-routine .step-count')).toHaveText(/0 من 4/);
+  });
+});
+
+test.describe('onboarding', () => {
+  /**
+   * The worst defect found in testing: reopening onboarding after finishing it
+   * and tapping skip once wrote fresh defaults over the trusted contacts, the
+   * breathing answer, and the country.
+   */
+  test('cannot be re-entered to overwrite what was already answered', async ({ page }) => {
+    await page.goto('./');
+    await page.getByRole('button', { name: 'تخطَّ' }).click();
+    await expect(page).toHaveURL(/#\/$/);
+
+    await page.goto('./#/settings');
+    await page.getByLabel('الاسم').fill('صديق');
+    await page.getByLabel('الرقم').fill('0111111111');
+    await page.getByRole('button', { name: 'إضافة' }).click();
+    await expect(page.getByText('0111111111')).toBeVisible();
+
+    await page.goto('./#/onboarding');
+    await expect(page).toHaveURL(/#\/$/);
+
+    await page.goto('./#/settings');
+    await expect(page.getByText('0111111111')).toBeVisible();
   });
 });

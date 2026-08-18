@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCopingCard, useDebouncedWrite } from '../storage/hooks';
 import type { CopingCard } from '../storage/types';
@@ -35,9 +36,27 @@ const PLACEHOLDER_FIELDS = new Set<Field>([
  * than one that does not.
  */
 export function CopingCardRoute() {
-  const { t } = useTranslation();
   const card = useCopingCard();
+
+  // The editor mounts only once the stored card is in hand, so its fields start
+  // from what was written rather than from a blank that never fills in.
+  if (card === undefined) return <div className="screen screen--narrow" aria-busy="true" />;
+  return <CopingCardEditor card={card} />;
+}
+
+function CopingCardEditor({ card }: { card: CopingCard }) {
+  const { t } = useTranslation();
   const { schedule } = useDebouncedWrite();
+  const [values, setValues] = useState<Record<Field, string>>(
+    () => Object.fromEntries(FIELDS.map((field) => [field, card[field] ?? ''])) as Record<Field, string>,
+  );
+
+  const edit = (field: Field, value: string) => {
+    setValues((current) => ({ ...current, [field]: value }));
+    // Keyed by field: editing two fields inside one debounce window used to
+    // discard the first one entirely.
+    schedule(field, (storage) => storage.saveCopingCard({ [field]: value }));
+  };
 
   return (
     <div className="screen screen--narrow coping-card">
@@ -52,13 +71,12 @@ export function CopingCardRoute() {
           <textarea
             className="textarea"
             rows={2}
-            defaultValue={card?.[field] ?? ''}
+            value={values[field]}
             placeholder={PLACEHOLDER_FIELDS.has(field) ? t(`card.placeholders.${field}`) : undefined}
-            onChange={(event) => {
-              const value = event.target.value;
-              schedule((storage) => storage.saveCopingCard({ [field]: value }));
-            }}
+            onChange={(event) => edit(field, event.target.value)}
           />
+          {/* Paper sees this copy, because a textarea prints only what fits. */}
+          <p className="coping-card__printed">{values[field]}</p>
         </label>
       ))}
 

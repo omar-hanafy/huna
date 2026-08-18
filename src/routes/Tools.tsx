@@ -25,15 +25,22 @@ export function Tools() {
   const write = useWrite();
   const today = useToday();
 
-  const breathingAvailable = preferences?.breathing !== 'worsens';
-  const [active, setActive] = useState<ToolId>(breathingAvailable ? 'breathing' : 'grounding');
+  const [active, setActive] = useState<ToolId>('breathing');
+
+  // Preferences arrive a tick after the first render. Deciding the default tab
+  // from that first render left the breathing tab selected but its panel empty
+  // once "breathing makes it worse" loaded, so the whole screen looked broken.
+  if (preferences === undefined) return <div className="screen tools" aria-busy="true" />;
+
+  const breathingAvailable = preferences.breathing !== 'worsens';
+  const shown: ToolId = active === 'breathing' && !breathingAvailable ? 'grounding' : active;
 
   const completeTask = (task: CoreTaskId) => {
-    void write(async (storage) => {
-      const day = await storage.getDay(today);
-      const tasks = { ...createEmptyTasks(), ...day?.tasks, [task]: true };
-      return storage.updateDay(today, { tasks });
-    });
+    void write((storage) =>
+      storage.updateDay(today, (current) => ({
+        tasks: { ...createEmptyTasks(), ...current.tasks, [task]: true },
+      })),
+    );
   };
 
   const tabs: ToolId[] = breathingAvailable
@@ -49,29 +56,28 @@ export function Tools() {
 
       {!breathingAvailable ? <p className="banner">{t('tools.breathingHidden')}</p> : null}
 
-      <div className="tool-tabs" role="tablist" aria-label={t('tools.title')}>
+      {/*
+        Plain toggle buttons rather than ARIA tabs: real tabs owe the user
+        arrow-key navigation and a wired-up panel relationship, and a half-built
+        tablist reads worse to a screen reader than an honest set of buttons.
+      */}
+      <div className="tool-tabs" role="group" aria-label={t('tools.title')}>
         {tabs.map((id) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={active === id}
-            onClick={() => setActive(id)}
-          >
+          <button key={id} type="button" aria-pressed={shown === id} onClick={() => setActive(id)}>
             {t(`tools.${id}`)}
           </button>
         ))}
       </div>
 
-      <div role="tabpanel">
-        {active === 'breathing' && breathingAvailable ? (
+      <div>
+        {shown === 'breathing' ? (
           <BreathingTool
-            reducedMotion={preferences?.reducedMotion ?? false}
+            reducedMotion={preferences.reducedMotion}
             onComplete={() => completeTask('breathing')}
           />
         ) : null}
-        {active === 'grounding' ? <GroundingTool onComplete={() => completeTask('orientation')} /> : null}
-        {active === 'relaxation' ? <RelaxationTool onComplete={() => completeTask('relaxation')} /> : null}
+        {shown === 'grounding' ? <GroundingTool onComplete={() => completeTask('orientation')} /> : null}
+        {shown === 'relaxation' ? <RelaxationTool onComplete={() => completeTask('relaxation')} /> : null}
       </div>
     </div>
   );

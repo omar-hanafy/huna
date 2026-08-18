@@ -1,7 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useRef } from 'react';
-import { useStorage, useStorageContext } from './useStorage';
+import { useStorageContext } from './useStorage';
 import type { AppStorage } from './AppStorage';
+import { StorageQuotaError, StorageUnavailableError } from './types';
 
 /**
  * Reads that stay in sync with writes from any tab.
@@ -9,11 +10,26 @@ import type { AppStorage } from './AppStorage';
  * Dexie's liveQuery observes the database rather than a copy held in memory,
  * which is what removes the last-write-wins clobbering the old localStorage
  * hook suffered from (defect 9).
+ *
+ * Known storage failures are absorbed into the provider's problem banner
+ * instead of being rethrown through render: a browser with IndexedDB blocked
+ * should land on the designed "storage unavailable" notice, not the crash
+ * screen.
  */
 export function useLive<T>(query: (storage: AppStorage) => Promise<T>, deps: unknown[] = []): T | undefined {
-  const storage = useStorage();
+  const { storage, reportProblem } = useStorageContext();
   // The query closure is recreated per render; deps decide when to re-subscribe.
-  return useLiveQuery(() => query(storage), [storage, ...deps]);
+  return useLiveQuery(
+    () =>
+      query(storage).catch((error: unknown) => {
+        if (error instanceof StorageUnavailableError || error instanceof StorageQuotaError) {
+          reportProblem(error);
+          return undefined;
+        }
+        throw error;
+      }),
+    [storage, ...deps],
+  );
 }
 
 export function usePreferences() {
@@ -68,35 +84,50 @@ export function useWrite() {
 /**
  * Trailing-edge debounce for free-text fields.
  *
- * The old hook serialised the entire application state on every keystroke
- * (defect 10). Text now settles for `delayMs` before it is written, and the
- * pending write is flushed on unmount so a fast navigation cannot drop it.
+ * Pending writes are keyed: repeated keystrokes in one field coalesce, while a
+ * quick move to a second field keeps both writes. The previous version held a
+ * single pending slot, so editing two fields within the delay silently
+ * discarded the first field's write - real data loss on the evening log.
+ *
+ * Everything pending is flushed on unmount and when the page is hidden, so a
+ * fast navigation or closing the PWA cannot drop the last edit.
  */
 export function useDebouncedWrite(delayMs = 400) {
   const write = useWrite();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pending = useRef<((storage: AppStorage) => Promise<unknown>) | null>(null);
+  const pending = useRef(new Map<string, (storage: AppStorage) => Promise<unknown>>());
 
   const flush = useCallback(() => {
     if (timer.current !== null) {
       clearTimeout(timer.current);
       timer.current = null;
     }
-    const mutate = pending.current;
-    pending.current = null;
-    if (mutate) void write(mutate);
+    const batch = [...pending.current.values()];
+    pending.current.clear();
+    for (const mutate of batch) void write(mutate);
   }, [write]);
 
   const schedule = useCallback(
-    (mutate: (storage: AppStorage) => Promise<unknown>) => {
-      pending.current = mutate;
+    (key: string, mutate: (storage: AppStorage) => Promise<unknown>) => {
+      pending.current.set(key, mutate);
       if (timer.current !== null) clearTimeout(timer.current);
       timer.current = setTimeout(flush, delayMs);
     },
     [delayMs, flush],
   );
 
-  useEffect(() => flush, [flush]);
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      flush();
+    };
+  }, [flush]);
 
   return { schedule, flush };
 }

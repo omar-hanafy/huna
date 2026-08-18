@@ -35,6 +35,10 @@ export function CheckOnce() {
       : { active: false, minutesAgo: null, lastCheck: null };
 
   const [acknowledged, setAcknowledged] = useState(false);
+  const [logged, setLogged] = useState<string | null>(null);
+
+  const label = (target: string) =>
+    t(`safetyChecks.targets.${target}`, { defaultValue: target });
 
   const log = (target: string) => {
     void write((storage) =>
@@ -46,6 +50,7 @@ export function CheckOnce() {
       }),
     );
     setAcknowledged(false);
+    setLogged(target);
     setCustom('');
   };
 
@@ -58,21 +63,27 @@ export function CheckOnce() {
         <p className="lede">{t('safetyChecks.helper')}</p>
       </div>
 
+      {/* With the reminder window off there is no seal to confirm the tap, so
+          say plainly that the check was recorded. */}
+      {logged && !showSeal ? (
+        <p className="banner" role="status">
+          {t('safetyChecks.logCheck', { target: label(logged) })}
+        </p>
+      ) : null}
+
       {showSeal && lockout.lastCheck ? (
         <section className="card card--calm stack">
           <span className="eyebrow">{t('alert.seal.title')}</span>
           <p>
             {t('safetyChecks.lastCheck', {
-              target: t(`safetyChecks.targets.${lockout.lastCheck.target}`, {
-                defaultValue: lockout.lastCheck.target,
-              }),
-              minutes: lockout.minutesAgo ?? 0,
+              target: label(lockout.lastCheck.target),
+              count: lockout.minutesAgo ?? 0,
             })}
           </p>
           <p className="muted">
             {t('alert.seal.checkedAt', {
               time: formatTime(lockout.lastCheck.at, i18n.language),
-              minutes: lockout.minutesAgo ?? 0,
+              count: lockout.minutesAgo ?? 0,
             })}
           </p>
 
@@ -95,7 +106,7 @@ export function CheckOnce() {
         <div className="check-grid">
           {TARGETS.filter((target) => target !== 'custom').map((target) => (
             <button key={target} type="button" className="choice" onClick={() => log(target)}>
-              <span className="choice__title">{t(`safetyChecks.targets.${target}`)}</span>
+              <span className="choice__title">{label(target)}</span>
             </button>
           ))}
         </div>

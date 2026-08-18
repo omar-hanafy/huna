@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { DangerAction } from '../../../components/DangerAction';
 import { CONTENT, type Locale } from '../../../content';
-import { usePreferences } from '../../../storage/hooks';
 import { useAlertFlow } from '../useAlertFlow';
 
 /**
@@ -19,16 +18,19 @@ import { useAlertFlow } from '../useAlertFlow';
  */
 export function DangerScreen() {
   const { t, i18n } = useTranslation();
-  const preferences = usePreferences();
-  const { state, dispatch } = useAlertFlow();
+  // From the flow rather than from storage: this screen must render even when
+  // the browser refuses storage entirely, and the flow already resolved the
+  // country and the contacts, falling back to defaults if it had to.
+  const { state, dispatch, preferences } = useAlertFlow();
 
   const locale: Locale = i18n.language === 'en' ? 'en' : 'ar';
+
   const countries = CONTENT[locale].crisis.countries;
   const country =
-    countries.find((entry) => entry.country === preferences?.country) ??
+    countries.find((entry) => entry.country === preferences.country) ??
     countries.find((entry) => entry.country === 'OTHER');
 
-  const contacts = preferences?.trustedContacts ?? [];
+  const contacts = preferences.trustedContacts;
   const unsure = state.safetyAnswer === 'unsure';
 
   return (
@@ -66,7 +68,7 @@ export function DangerScreen() {
             href={`tel:${resource.number}`}
             note={t('alert.danger.verifiedOn', { date: resource.lastVerified })}
           >
-            {resource.label}: {resource.number}
+            {resource.label}: <bdi>{resource.number}</bdi>
           </DangerAction>
         ))}
       </div>

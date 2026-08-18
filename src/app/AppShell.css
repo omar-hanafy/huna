@@ -10,10 +10,17 @@
   padding-block-end: calc(5rem + env(safe-area-inset-bottom));
 }
 
+/*
+ * The one notice the user must be able to read whatever else is switched on.
+ * Its ink and ground travel together as a pair, because discreet mode collapses
+ * the amber into a neutral: the dark ink that reads well on amber is invisible
+ * on a dark slate.
+ */
 .storage-banner {
   padding: var(--space-3) var(--space-4);
-  background: var(--accent-amber);
-  color: #18302a;
+  background: var(--notice-bg);
+  color: var(--notice-ink);
+  border-block-end: 1px solid var(--border);
   font-size: var(--text-sm);
   text-align: center;
 }
@@ -105,16 +112,4 @@
     border-inline-start: 0;
     border-inline-end: 1px solid var(--border);
   }
-}
-
-.update-notice {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  background: var(--surface-calm);
-  border-block-end: 1px solid var(--border);
-  font-size: var(--text-sm);
 }

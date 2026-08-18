@@ -12,7 +12,7 @@ if (!container) throw new Error('Missing #root element');
 
 createRoot(container).render(
   <StrictMode>
-    <ErrorBoundary onExport={runEmergencyExport}>
+    <ErrorBoundary onExport={() => void runEmergencyExport()}>
       <Providers>
         <App />
       </Providers>

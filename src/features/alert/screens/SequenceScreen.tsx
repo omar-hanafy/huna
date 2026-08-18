@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAlertFlow } from '../useAlertFlow';
 
@@ -11,11 +12,20 @@ import { useAlertFlow } from '../useAlertFlow';
 export function SequenceScreen() {
   const { t } = useTranslation();
   const { state, dispatch, sequence } = useAlertFlow();
+  const instruction = useRef<HTMLParagraphElement>(null);
+
+  const total = sequence ? sequence.steps.length : 0;
+  const index = total > 0 ? Math.min(state.stepIndex, total - 1) : 0;
+
+  // The new instruction takes focus, so a screen reader reads the step the user
+  // just moved to instead of leaving them on a button that no longer describes
+  // what is on screen.
+  useEffect(() => {
+    instruction.current?.focus({ preventScroll: true });
+  }, [index]);
 
   if (!sequence) return null;
 
-  const total = sequence.steps.length;
-  const index = Math.min(state.stepIndex, total - 1);
   const step = sequence.steps[index];
   if (!step) return null;
 
@@ -31,7 +41,9 @@ export function SequenceScreen() {
       </div>
 
       <div className="sequence-instruction">
-        <p className="sequence-instruction__text">{step.text}</p>
+        <p className="sequence-instruction__text" ref={instruction} tabIndex={-1}>
+          {step.text}
+        </p>
         {step.hint ? <p className="muted">{step.hint}</p> : null}
       </div>
 
@@ -53,11 +65,15 @@ export function SequenceScreen() {
           >
             {t('common.back')}
           </button>
-          {/* Leaving early is a legitimate choice, not a failure to finish. */}
+          {/*
+            Leaving this exercise is a legitimate choice, not a failure to
+            finish. It returns to the picker: sending everyone to one fixed
+            sequence did nothing at all when they were already in that one.
+          */}
           <button
             type="button"
             className="button button--quiet"
-            onClick={() => dispatch({ type: 'CHOOSE_STATE', stateId: 'unsure' })}
+            onClick={() => dispatch({ type: 'CHANGE_EXERCISE' })}
           >
             {t('alert.sequence.tooMuch')}
           </button>

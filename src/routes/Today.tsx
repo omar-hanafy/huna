@@ -1,20 +1,33 @@
-import { useState } from 'react';
+import { useState, type FocusEvent } from 'react';
 import { Check } from 'lucide-react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { ActivationSlider } from '../components/ActivationSlider';
 import { CONTENT, type Locale } from '../content';
+import { taskProgress } from '../core/daily-tasks';
 import { activeWeek } from '../core/program';
 import { createId } from '../lib/id';
 import { formatDate } from '../lib/date';
 import { useToday } from '../lib/useToday';
 import { useNow } from '../lib/useNow';
 import { useDay, useDebouncedWrite, usePreferences, useWrite } from '../storage/hooks';
-import { CORE_TASK_IDS, createDayRecord, type CoreTaskId } from '../storage/types';
+import {
+  clampActivationValue,
+  clampMinutesValue,
+  clampSleepHoursValue,
+  createDayRecord,
+  type CoreTaskId,
+} from '../storage/types';
 import { ValueCommitmentCard } from '../features/values/ValueCommitmentCard';
 import './Today.css';
 
-const BUSY_DAY_TASKS: CoreTaskId[] = ['orientation', 'breathing', 'movement', 'checkins'];
+/** Shows the saved value rather than the out-of-range one that was typed. */
+function clampOnBlur(clamp: (value: number) => number) {
+  return (event: FocusEvent<HTMLInputElement>) => {
+    if (event.target.value === '') return;
+    event.target.value = String(clamp(Number(event.target.value)));
+  };
+}
 
 /**
  * The daily routine.
@@ -36,29 +49,46 @@ export function Today() {
   const locale: Locale = i18n.language === 'en' ? 'en' : 'ar';
   const week = preferences ? activeWeek(preferences, now) : 1;
   const weekContent = CONTENT[locale].program.weeks[week - 1];
+  /*
+   * Nothing renders until the stored day is in hand.
+   *
+   * The evening fields are uncontrolled, so their value is fixed at mount. If
+   * the screen rendered first and the record arrived second, either the fields
+   * stayed blank with a saved value behind them, or remounting them to fix that
+   * threw away whatever the user had already started typing.
+   */
+  if (day === undefined || preferences === undefined) {
+    return <div className="screen today" aria-busy="true" />;
+  }
+
   const record = day ?? createDayRecord(today, week);
-  const breathingHidden = preferences?.breathing === 'worsens';
+  const { tasks: visibleTasks, done: doneCount } = taskProgress(record, preferences);
 
-  const visibleTasks = (record.busyDay ? BUSY_DAY_TASKS : [...CORE_TASK_IDS]).filter(
-    (task) => !(task === 'breathing' && breathingHidden),
-  );
-  const doneCount = visibleTasks.filter((task) => record.tasks[task]).length;
-
+  // Every patch below is a function of the stored record, never of the copy
+  // this render is holding: two taps in quick succession must not undo each
+  // other, and a second tab editing the same day must not be overwritten.
   const toggleTask = (task: CoreTaskId) => {
     void write((storage) =>
-      storage.updateDay(today, { tasks: { ...record.tasks, [task]: !record.tasks[task] } }),
+      storage.updateDay(today, (current) => ({ tasks: { ...current.tasks, [task]: !current.tasks[task] } })),
     );
   };
 
   const addCheckIn = () => {
-    const checkIns = [
-      ...record.checkIns,
-      { id: createId(), createdAt: new Date().toISOString(), activation: checkInValue, note: null },
-    ];
     void write((storage) =>
-      storage.updateDay(today, {
-        checkIns,
-        tasks: { ...record.tasks, checkins: checkIns.length >= 3 ? true : record.tasks.checkins },
+      storage.updateDay(today, (current) => {
+        const checkIns = [
+          ...current.checkIns,
+          {
+            id: createId(),
+            createdAt: new Date().toISOString(),
+            activation: clampActivationValue(checkInValue),
+            note: null,
+          },
+        ];
+        return {
+          checkIns,
+          tasks: { ...current.tasks, checkins: checkIns.length >= 3 ? true : current.tasks.checkins },
+        };
       }),
     );
   };
@@ -74,7 +104,9 @@ export function Today() {
         type="button"
         className="button button--secondary"
         aria-pressed={record.busyDay}
-        onClick={() => void write((storage) => storage.updateDay(today, { busyDay: !record.busyDay }))}
+        onClick={() =>
+          void write((storage) => storage.updateDay(today, (current) => ({ busyDay: !current.busyDay })))
+        }
       >
         {record.busyDay ? t('today.busyDayOn') : t('today.busyDay')}
       </button>
@@ -150,9 +182,11 @@ export function Today() {
               step={0.5}
               defaultValue={record.sleepHours ?? ''}
               onChange={(event) => {
-                const value = event.target.value === '' ? null : Number(event.target.value);
-                schedule((storage) => storage.updateDay(today, { sleepHours: value }));
+                const raw = event.target.value;
+                const value = raw === '' ? null : clampSleepHoursValue(Number(raw));
+                schedule('sleepHours', (storage) => storage.updateDay(today, { sleepHours: value }));
               }}
+              onBlur={clampOnBlur(clampSleepHoursValue)}
             />
           </label>
           <label className="field">
@@ -164,9 +198,11 @@ export function Today() {
               max={600}
               defaultValue={record.recoveryMinutes ?? ''}
               onChange={(event) => {
-                const value = event.target.value === '' ? null : Number(event.target.value);
-                schedule((storage) => storage.updateDay(today, { recoveryMinutes: value }));
+                const raw = event.target.value;
+                const value = raw === '' ? null : clampMinutesValue(Number(raw));
+                schedule('recoveryMinutes', (storage) => storage.updateDay(today, { recoveryMinutes: value }));
               }}
+              onBlur={clampOnBlur(clampMinutesValue)}
             />
           </label>
         </div>
@@ -175,7 +211,11 @@ export function Today() {
           id="day-activation"
           label={t('today.dayRating')}
           value={record.activation ?? 5}
-          onChange={(value) => void write((storage) => storage.updateDay(today, { activation: value }))}
+          onChange={(value) =>
+            void write((storage) =>
+              storage.updateDay(today, { activation: clampActivationValue(value) }),
+            )
+          }
         />
 
         <label className="field">
@@ -185,7 +225,7 @@ export function Today() {
             defaultValue={record.note}
             onChange={(event) => {
               const value = event.target.value;
-              schedule((storage) => storage.updateDay(today, { note: value }));
+              schedule('note', (storage) => storage.updateDay(today, { note: value }));
             }}
           />
         </label>

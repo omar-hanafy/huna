@@ -118,7 +118,7 @@
   cursor: pointer;
 }
 
-.tool-tabs button[aria-selected='true'] {
+.tool-tabs button[aria-pressed='true'] {
   border-color: var(--primary);
   background: var(--surface-calm);
   color: var(--primary);

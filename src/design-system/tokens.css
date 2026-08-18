@@ -40,6 +40,14 @@
   --accent-amber: #e7b976;
 
   /*
+   * The storage notice, as a pair. Kept apart from the accents because it is
+   * the one surface that always carries text, so its ground and its ink have
+   * to stay in step through every theme and through discreet mode.
+   */
+  --notice-bg: #e7b976;
+  --notice-ink: #18302a;
+
+  /*
    * Reserved for a danger the USER reported. Never for a high activation score.
    * Consumed by exactly one component; a test asserts nothing else references it.
    */
@@ -125,6 +133,9 @@
     --accent-sand: #b99b78;
     --accent-amber: #c9a063;
 
+    --notice-bg: #c9a063;
+    --notice-ink: #18302a;
+
     --danger: #e08585; /* 6.5:1 on --bg */
     --danger-contrast: #141c1a;
 
@@ -162,6 +173,9 @@
   --accent-sand: #b99b78;
   --accent-amber: #c9a063;
 
+  --notice-bg: #c9a063;
+  --notice-ink: #18302a;
+
   --danger: #e08585;
   --danger-contrast: #141c1a;
 
@@ -191,6 +205,9 @@
   --accent-blue: var(--border);
   --accent-sand: var(--border);
   --accent-amber: var(--border);
+  /* The notice keeps ordinary text colour rather than ink meant for amber. */
+  --notice-bg: var(--surface-1);
+  --notice-ink: var(--text);
   --shadow-sm: none;
   --shadow-md: none;
 }

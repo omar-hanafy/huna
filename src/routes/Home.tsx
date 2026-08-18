@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { taskProgress } from '../core/daily-tasks';
 import { activeWeek } from '../core/program';
 import { useDay, usePreferences } from '../storage/hooks';
 import { useToday } from '../lib/useToday';
@@ -22,10 +23,15 @@ export function Home() {
   const now = useNow();
 
   const week = preferences ? activeWeek(preferences, now) : 1;
-  const doneCount = day ? Object.values(day.tasks).filter(Boolean).length : 0;
+  // The same count Today shows, from the same helper: a busy day or hidden
+  // breath work changes the denominator in both places or in neither.
+  const { done: doneCount, total } = taskProgress(day, preferences);
 
   return (
     <div className="screen home">
+      {/* The screen needs a heading; the design does not need it shown. */}
+      <h1 className="sr-only">{t('app.name')}</h1>
+
       {/*
         The button carries a grounding mark, not a warning symbol. The label
         already says what the state is; the icon says what happens next.
@@ -49,7 +55,7 @@ export function Home() {
             <span className="eyebrow">{t('home.weekChip', { week })}</span>
             <h2>{t('home.todayStep')}</h2>
           </div>
-          <span className="step-count">{t('today.counter', { done: doneCount, total: 6 })}</span>
+          <span className="step-count">{t('today.counter', { done: doneCount, total })}</span>
         </div>
         <Link className="button button--secondary" to="/today">
           {t('nav.today')}

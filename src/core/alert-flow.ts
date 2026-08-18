@@ -48,6 +48,7 @@ export type AlertEvent =
   | { type: 'NEXT_SEQUENCE_STEP'; stepCount: number }
   | { type: 'PREVIOUS_SEQUENCE_STEP' }
   | { type: 'FINISH_SEQUENCE' }
+  | { type: 'CHANGE_EXERCISE' }
   | { type: 'CHOOSE_ACTION'; action: string | null }
   | { type: 'BACK' };
 
@@ -124,6 +125,13 @@ export function alertFlowReducer(state: AlertFlowState, event: AlertEvent): Aler
     case 'FINISH_SEQUENCE':
       return { ...state, step: 'action' };
 
+    case 'CHANGE_EXERCISE':
+      // "Try a different one" returns to the state picker rather than jumping
+      // to a hard-coded sequence: from the generic sequence itself, a fixed
+      // target would be a no-op, which reads as a dead button mid-episode.
+      // Clearing the state keeps a reload honest: it resumes at the picker.
+      return { ...state, step: 'state', stateId: null, stepIndex: 0 };
+
     case 'CHOOSE_ACTION':
       return { ...state, chosenAction: event.action, actionChosen: true, step: 'done' };
 
@@ -175,9 +183,35 @@ export function toSession(state: AlertFlowState, base: AlertSession): AlertSessi
     startedAt: state.startedAt,
     safetyAnswer: state.safetyAnswer,
     stateId: state.stateId,
+    // The screen itself is recorded, because the other fields cannot always
+    // reconstruct it: after "try a different exercise" the state is cleared
+    // again, and deriving from the safety answer alone would send someone who
+    // answered "not sure" back to the danger screen they had already left.
+    step: state.step,
+    stepIndex: state.stepIndex,
     activationBefore: state.activationBefore,
     chosenAction: state.chosenAction,
   };
+}
+
+/**
+ * How long an interrupted session stays resumable.
+ *
+ * An episode is minutes long, but the danger screen itself tells the user to
+ * leave the place and reach safety, which can legitimately take a while. Beyond
+ * this window the open session is treated as abandoned and a fresh one starts;
+ * resuming a days-old session would restore a stale activation reading and
+ * stretch its recorded duration across days. The abandoned record keeps its
+ * null `endedAt`: fabricating an end time would fabricate a session length.
+ */
+export const RESUME_WINDOW_HOURS = 6;
+
+export function isResumable(session: AlertSession, now: Date): boolean {
+  if (session.endedAt !== null) return false;
+  const started = new Date(session.startedAt).getTime();
+  if (Number.isNaN(started)) return false;
+  const ageHours = (now.getTime() - started) / 3_600_000;
+  return ageHours >= 0 && ageHours < RESUME_WINDOW_HOURS;
 }
 
 /** Steps before the grounding sequence begins. */
@@ -208,11 +242,24 @@ export function resumeFrom(session: AlertSession, lockoutActive = false): AlertF
   };
 
   const resumed = ((): AlertFlowState => {
+    // The recorded screen wins when there is one. Only a sequence needs a
+    // chosen state to render, so that one pair is checked rather than trusted.
+    if (session.step !== undefined && !(session.step === 'sequence' && session.stateId === null)) {
+      return { ...base, step: session.step, stepIndex: session.stepIndex ?? 0 };
+    }
+
+    // Older records have no screen on them, so it is derived. A chosen state
+    // means grounding began, so grounding is where the refresh lands, whatever
+    // the safety answer was: the previous ordering checked the answer first and
+    // threw anyone who had answered "yes" or "unsure", pressed "I'm safe now",
+    // and started an exercise back onto the danger screen.
+    if (session.stateId !== null) {
+      if (session.chosenAction !== null) return { ...base, step: 'action' };
+      return { ...base, step: 'sequence', stepIndex: session.stepIndex ?? 0 };
+    }
     if (session.safetyAnswer === null) return base;
     if (session.safetyAnswer !== 'no') return { ...base, step: 'danger' };
-    if (session.stateId === null) return { ...base, step: 'state' };
-    if (session.chosenAction === null) return { ...base, step: 'sequence' };
-    return { ...base, step: 'action' };
+    return { ...base, step: 'state' };
   })();
 
   if (lockoutActive && PRE_GROUNDING.includes(resumed.step)) {

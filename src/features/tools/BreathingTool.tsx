@@ -43,15 +43,17 @@ export function BreathingTool({ onComplete, reducedMotion = false }: BreathingTo
   const cycleSeconds = inhale + exhale;
   const totalSeconds = cycleSeconds * targetCycles;
 
-  const reset = useCallback(() => {
+  const resetWith = useCallback((nextInhale: number) => {
     setRunning(false);
     setPhase('idle');
-    setRemaining(inhale);
+    setRemaining(nextInhale);
     setCompletedCycles(0);
     startedAt.current = null;
     elapsedBeforePause.current = 0;
     notified.current = false;
-  }, [inhale]);
+  }, []);
+
+  const reset = useCallback(() => resetWith(inhale), [resetWith, inhale]);
 
   useEffect(() => {
     if (!running) return;
@@ -129,8 +131,13 @@ export function BreathingTool({ onComplete, reducedMotion = false }: BreathingTo
           className="breath-orb__core"
           style={{ '--phase-seconds': `${phase === 'inhale' ? inhale : exhale}s` } as React.CSSProperties}
         >
-          <strong aria-live="polite">{phase === 'idle' ? '' : phase === 'complete' ? '✓' : remaining}</strong>
-          <span>{label}</span>
+          {/*
+            The countdown is not announced: a screen reader reciting a new
+            number every second buries the instruction. The phase label is the
+            part worth hearing, and it changes only when the breath does.
+          */}
+          <strong aria-hidden="true">{phase === 'idle' ? '' : phase === 'complete' ? '✓' : remaining}</strong>
+          <span aria-live="polite">{label}</span>
         </div>
       </div>
 
@@ -156,6 +163,11 @@ export function BreathingTool({ onComplete, reducedMotion = false }: BreathingTo
         </button>
       </div>
 
+      {/*
+        Changing the rhythm restarts the session rather than reinterpreting the
+        time already spent: shrinking a paused twenty-cycle session to six used
+        to jump straight to "done" without a single breath being taken.
+      */}
       <details className="tool__settings">
         <summary>{t('tools.adjustRhythm')}</summary>
         <div className="tool__settings-grid">
@@ -165,7 +177,11 @@ export function BreathingTool({ onComplete, reducedMotion = false }: BreathingTo
               className="select"
               value={inhale}
               disabled={running}
-              onChange={(e) => setInhale(Number(e.target.value))}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                setInhale(value);
+                resetWith(value);
+              }}
             >
               {INHALE_OPTIONS.map((value) => (
                 <option key={value} value={value}>
@@ -180,7 +196,10 @@ export function BreathingTool({ onComplete, reducedMotion = false }: BreathingTo
               className="select"
               value={exhale}
               disabled={running}
-              onChange={(e) => setExhale(Number(e.target.value))}
+              onChange={(e) => {
+                setExhale(Number(e.target.value));
+                resetWith(inhale);
+              }}
             >
               {EXHALE_OPTIONS.map((value) => (
                 <option key={value} value={value}>
@@ -195,7 +214,10 @@ export function BreathingTool({ onComplete, reducedMotion = false }: BreathingTo
               className="select"
               value={targetCycles}
               disabled={running}
-              onChange={(e) => setTargetCycles(Number(e.target.value))}
+              onChange={(e) => {
+                setTargetCycles(Number(e.target.value));
+                resetWith(inhale);
+              }}
             >
               {CYCLE_OPTIONS.map((value) => (
                 <option key={value} value={value}>

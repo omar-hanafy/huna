@@ -6,12 +6,14 @@ import {
   StorageQuotaError,
   StorageUnavailableError,
   createDayRecord,
+  createEmptyTasks,
   type AlertSession,
   type JournalEntry,
   type LadderItem,
   type LadderSession,
   type SafetyCheck,
 } from '../types';
+import { collectEmergencyBundle } from '../emergencyExport';
 import { HunaDatabase, wrapStorageErrors } from './db';
 import { IndexedDbStorage } from './IndexedDbStorage';
 
@@ -134,6 +136,37 @@ describe('days', () => {
     expect(updated.date).toBe('2026-08-17');
   });
 
+  /**
+   * The patch reads the stored record inside the write transaction, which is
+   * what stops a second edit from writing a stale copy back over the first.
+   */
+  it('applies a functional patch to what is stored, not to a stale copy', async () => {
+    await storage.updateDay('2026-08-17', { tasks: { ...createEmptyTasks(), orientation: true } });
+    const updated = await storage.updateDay('2026-08-17', (current) => ({
+      tasks: { ...current.tasks, movement: true },
+    }));
+    expect(updated.tasks.orientation).toBe(true);
+    expect(updated.tasks.movement).toBe(true);
+  });
+
+  it('files a newly created record under the week the program is on', async () => {
+    await storage.savePreferences({ programStartedAt: '2026-08-03T09:00:00.000Z', weekOverride: null });
+    const created = await storage.updateDay('2026-08-17', { note: 'x' });
+    expect(created.week).toBe(3);
+  });
+
+  /** Numbers a user can type freely are clamped before they reach the store. */
+  it('clamps out-of-range numbers instead of storing an unexportable record', async () => {
+    const updated = await storage.updateDay('2026-08-17', {
+      sleepHours: 900,
+      recoveryMinutes: -5,
+      activation: 42,
+    });
+    expect(updated.sleepHours).toBe(24);
+    expect(updated.recoveryMinutes).toBe(0);
+    expect(updated.activation).toBe(10);
+  });
+
   it('filters by an inclusive date range and returns chronological order', async () => {
     for (const date of ['2026-08-14', '2026-08-15', '2026-08-16', '2026-08-17']) {
       await storage.saveDay(createDayRecord(date, 1));
@@ -179,6 +212,41 @@ describe('safety checks', () => {
 
   it('returns null when nothing has been checked', async () => {
     expect(await storage.getLastSafetyCheck()).toBeNull();
+  });
+
+  /** The repeat-check chart reads a window, and reads it in order. */
+  it('returns the checks inside a range, chronologically', async () => {
+    await storage.saveSafetyCheck(check('c', '2026-08-17T10:00:00.000Z'));
+    await storage.saveSafetyCheck(check('a', '2026-08-15T10:00:00.000Z'));
+    await storage.saveSafetyCheck(check('b', '2026-08-16T10:00:00.000Z'));
+
+    const all = await storage.getSafetyChecks();
+    expect(all.map((item) => item.id)).toEqual(['a', 'b', 'c']);
+
+    const ranged = await storage.getSafetyChecks({
+      from: '2026-08-16T00:00:00.000Z',
+      to: '2026-08-16T23:59:59.999Z',
+    });
+    expect(ranged.map((item) => item.id)).toEqual(['b']);
+  });
+});
+
+describe('value commitments', () => {
+  const commitment = (id: string, date: string) => ({
+    id,
+    date,
+    value: 'العائلة',
+    action: 'اتصال قصير',
+    completed: false,
+  });
+
+  it('round-trips commitments and filters them by date', async () => {
+    await storage.saveValueCommitment(commitment('b', '2026-08-17'));
+    await storage.saveValueCommitment(commitment('a', '2026-08-10'));
+
+    expect((await storage.getValueCommitments()).map((item) => item.id)).toEqual(['a', 'b']);
+    const ranged = await storage.getValueCommitments({ from: '2026-08-15', to: '2026-08-20' });
+    expect(ranged.map((item) => item.id)).toEqual(['b']);
   });
 });
 
@@ -314,6 +382,117 @@ describe('export and import', () => {
     expect(await storage.getDay('2026-08-17')).not.toBeNull();
   });
 
+  /**
+   * A build that did not clamp inputs could store 900 hours of sleep, and the
+   * strict schema then refused the user's own backup. The numbers are repaired
+   * rather than the file being declared unreadable.
+   */
+  it('salvages a backup whose numbers fall outside the schema', async () => {
+    const bundle = await storage.exportAll();
+    const day = {
+      ...createDayRecord('2026-08-17', 1),
+      sleepHours: 900,
+      recoveryMinutes: 99_999,
+      activation: 44,
+      checkIns: [{ id: 'c1', createdAt: '2026-08-17T09:00:00.000Z', activation: 99, note: null }],
+    };
+    const journalEntry: JournalEntry = {
+      id: 'j1',
+      createdAt: '2026-08-17T09:00:00.000Z',
+      trigger: '',
+      prediction: '',
+      evidenceDanger: '',
+      evidenceAlarm: '',
+      response: '',
+      recoveryMinutes: 5_000,
+      intensityBefore: 99,
+      intensityAfter: -3,
+    };
+    const target = freshStorage();
+    const result = await target.importAll({
+      ...bundle,
+      days: [day],
+      journalEntries: [journalEntry],
+      alertSessions: [alertSession({ activationBefore: 88, activationAfter: -2, stepIndex: -4 })],
+      ladderItems: [
+        { id: 'l1', title: 'x', expectedActivation: 77, order: -2, createdAt: FIXED_NOW.toISOString(), archived: false },
+      ],
+      ladderSessions: [
+        {
+          id: 'ls1',
+          itemId: 'l1',
+          startedAt: FIXED_NOW.toISOString(),
+          endedAt: null,
+          readings: [{ minute: 900, value: 55 }],
+          completed: false,
+          note: '',
+        },
+      ],
+    });
+
+    expect(result.ok).toBe(true);
+    const restored = await target.getDay('2026-08-17');
+    expect(restored?.sleepHours).toBe(24);
+    expect(restored?.checkIns[0]?.activation).toBe(10);
+  });
+
+  it('still refuses a bundle that is structurally wrong, not merely out of range', async () => {
+    const bundle = await storage.exportAll();
+    const result = await freshStorage().importAll({ ...bundle, days: [{ sleepHours: 900 }] });
+    expect(result.ok).toBe(false);
+  });
+
+  /**
+   * The سَكينة v1 blob is a file a user can plausibly still have. Importing it
+   * merges rather than replaces: the legacy format carries no preferences or
+   * alert history, so a replace would trade real data for a partial restore.
+   */
+  it('imports a raw سَكينة v1 blob, keeping what is already stored', async () => {
+    await storage.saveAlertSession(alertSession());
+    const legacy = {
+      version: 1,
+      days: {
+        '2026-08-10': {
+          date: '2026-08-10',
+          week: 1,
+          tasks: { orientation: true },
+          vigilance: 6,
+          sleepHours: 7,
+          recoveryMinutes: 20,
+          note: 'x',
+          checkIns: [],
+        },
+      },
+    };
+
+    const result = await storage.importAll(legacy);
+    expect(result.ok).toBe(true);
+    expect(result.counts.days).toBe(1);
+    expect(await storage.getDay('2026-08-10')).not.toBeNull();
+    // Not wiped by the merge.
+    expect(await storage.getAlertSessions()).toHaveLength(1);
+  });
+
+  /**
+   * The crash screen offers an export precisely when the app cannot build a
+   * normal one, so that file is a raw table dump. If the importer could not
+   * read it back, the rescue would be theatre.
+   */
+  it('imports a rescue dump written by the crash screen', async () => {
+    await storage.saveDay(createDayRecord('2026-08-17', 1));
+    await storage.saveAlertSession(alertSession());
+    await storage.initialise();
+
+    const rescue = await collectEmergencyBundle(null, (storage as unknown as { db: HunaDatabase }).db);
+
+    const target = freshStorage();
+    const result = await target.importAll(rescue);
+
+    expect(result.ok).toBe(true);
+    expect(await target.getDay('2026-08-17')).not.toBeNull();
+    expect(await target.getAlertSessions()).toHaveLength(1);
+  });
+
   it('replaces rather than merges, so a restore is a true restore', async () => {
     await storage.saveDay(createDayRecord('2026-08-01', 1));
     const bundle = await storage.exportAll();
@@ -348,6 +527,23 @@ describe('deleteAll', () => {
     expect(await storage.getDays()).toEqual([]);
     expect(await storage.getAlertSessions()).toEqual([]);
     expect(await storage.getJournalEntries()).toEqual([]);
+  });
+
+  /**
+   * The سَكينة v1 key is never deleted from localStorage, so the marker saying
+   * "already imported" is the only thing standing between an erase and the next
+   * launch resurrecting the very journal the user asked to destroy.
+   */
+  it('keeps the migration marker so an erase cannot be undone by the next launch', async () => {
+    await storage.saveMeta({ migratedFrom: 'sakina.app-state.v1' });
+    await storage.deleteAll();
+    expect((await storage.getMeta()).migratedFrom).toBe('sakina.app-state.v1');
+  });
+
+  it('leaves no marker behind when there was never a migration', async () => {
+    await storage.initialise();
+    await storage.deleteAll();
+    expect((await storage.getMeta()).migratedFrom).toBeNull();
   });
 });
 

@@ -785,3 +785,33 @@ recorded in the decision log:
   last incidental re-render (D14).
 - The activation slider's fill grew from the wrong end in Arabic, because the
   gradient was flipped for RTL on top of the browser's own flip.
+
+---
+
+## 25. The manual-verification sweep
+
+A real-user pass through the built app, followed by an audit of the whole tree,
+found defects that neither the unit suite nor the e2e suite could see, because
+each one needed a person doing two ordinary things in sequence. They are fixed
+in decisions D18 to D30. The ones worth remembering as requirements:
+
+1. **Nothing the user typed may be lost.** Debounced writes are keyed per field,
+   flushed on unmount, on `pagehide`, and when the page is hidden. Uncontrolled
+   fields remount once their stored value arrives, so a saved value is never
+   displayed as blank.
+2. **A refresh resumes where the user was**, including the step inside the
+   sequence, and regardless of what the safety answer was. Sessions older than
+   six hours start fresh rather than resuming stale.
+3. **The alert flow is reachable before onboarding and while storage is
+   broken.** Onboarding cannot be re-entered once completed.
+4. **One follow-up per cluster.** Answering closes the rest as missed, which
+   keeps them out of the return-to-life denominator.
+5. **Erasing is final.** The migration marker survives an erase so the legacy
+   سَكينة data cannot resurrect itself on the next launch.
+6. **A backup the app wrote is always restorable.** Out-of-range numbers from
+   older builds are clamped on import rather than rejecting the whole file, and
+   a raw سَكينة v1 blob imports as a merge.
+7. **Every counted string uses real plural families**, six categories in Arabic
+   and two in English, and the locale-parity guard compares base keys.
+8. **Destructive actions in lists take two taps**, and the trusted contacts a
+   crisis screen depends on are editable from settings, not only at setup.

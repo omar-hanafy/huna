@@ -73,3 +73,19 @@ export function formatDate(key: DateKey, locale: string, options?: Intl.DateTime
 export function formatTime(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, { hour: 'numeric', minute: '2-digit' }).format(new Date(iso));
 }
+
+/**
+ * Date and time together, for lists that span more than one day.
+ *
+ * The journal used to head every entry with a bare time, so a week of entries
+ * read as an unordered pile of clock readings with no way to tell yesterday
+ * from last Tuesday.
+ */
+export function formatDateTime(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(iso));
+}

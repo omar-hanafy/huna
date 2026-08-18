@@ -62,6 +62,9 @@ test.describe('keyboard operation', () => {
   test('draws a focus ring on a button reached by Tab', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'WebKit does not tab to buttons by default');
     await page.goto('./#/alert');
+    // The flow renders once its stored session has been read; tabbing before
+    // that lands on nothing and tests nothing.
+    await expect(page.getByRole('button').first()).toBeVisible();
     await page.keyboard.press('Tab');
 
     const outline = await page.evaluate(() => {
@@ -133,6 +136,7 @@ test.describe('reduced motion', () => {
   test('disables transitions when the OS asks for it', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await start({ page });
+    await expect(page.locator('.alert-button')).toBeVisible();
 
     const duration = await page.evaluate(() => {
       const button = document.querySelector('.alert-button');

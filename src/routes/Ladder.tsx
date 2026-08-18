@@ -30,8 +30,25 @@ export function Ladder() {
 
   const [title, setTitle] = useState('');
   const [expected, setExpected] = useState(4);
-  const [active, setActive] = useState<LadderSession | null>(null);
   const [reading, setReading] = useState(5);
+  const [armedForDelete, setArmedForDelete] = useState<string | null>(null);
+
+  /**
+   * The running session is read from storage, not held in component state.
+   *
+   * An exposure that was interrupted by a tab switch or a navigation is still
+   * happening in the real world; keeping it in state stranded it, open forever,
+   * with no way back into it. Reading it back means leaving the screen and
+   * returning simply resumes.
+   *
+   * A session whose item was deleted is not offered: there is nothing left to
+   * describe what the user is standing in.
+   */
+  const active: LadderSession | null =
+    (sessions ?? [])
+      .filter((session) => session.endedAt === null)
+      .filter((session) => (items ?? []).some((item) => item.id === session.itemId))
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0] ?? null;
 
   const addItem = () => {
     if (!title.trim()) return;
@@ -39,12 +56,19 @@ export function Ladder() {
       id: createId(),
       title: title.trim(),
       expectedActivation: expected,
-      order: (items?.length ?? 0) + 1,
+      // Highest order plus one, not the count: after a deletion the count
+      // repeats an order that is already taken.
+      order: Math.max(0, ...(items ?? []).map((existing) => existing.order)) + 1,
       createdAt: new Date().toISOString(),
       archived: false,
     };
     void write((storage) => storage.saveLadderItem(item));
     setTitle('');
+  };
+
+  const deleteItem = (item: LadderItem) => {
+    setArmedForDelete(null);
+    void write((storage) => storage.deleteLadderItem(item.id));
   };
 
   const startSession = (itemId: string) => {
@@ -57,28 +81,32 @@ export function Ladder() {
       completed: false,
       note: '',
     };
-    setActive(session);
     setReading(5);
     void write((storage) => storage.saveLadderSession(session));
   };
 
   const record = (minute: number) => {
     if (!active) return;
-    const next: LadderSession = {
-      ...active,
-      readings: [...active.readings.filter((r) => r.minute !== minute), { minute, value: reading }].sort(
-        (a, b) => a.minute - b.minute,
-      ),
-    };
-    setActive(next);
-    void write((storage) => storage.saveLadderSession(next));
+    const value = reading;
+    void write(async (storage) => {
+      // Re-read first: two checkpoints tapped in quick succession must not
+      // write over each other with a copy from before the previous tap.
+      const stored = (await storage.getLadderSessions(active.itemId)).find((s) => s.id === active.id);
+      const base = stored ?? active;
+      return storage.saveLadderSession({
+        ...base,
+        readings: [...base.readings.filter((r) => r.minute !== minute), { minute, value }].sort(
+          (a, b) => a.minute - b.minute,
+        ),
+      });
+    });
   };
 
   const endSession = () => {
     if (!active) return;
-    const ended: LadderSession = { ...active, endedAt: new Date().toISOString(), completed: true };
-    void write((storage) => storage.saveLadderSession(ended));
-    setActive(null);
+    void write((storage) =>
+      storage.saveLadderSession({ ...active, endedAt: new Date().toISOString(), completed: true }),
+    );
   };
 
   return (
@@ -146,14 +174,36 @@ export function Ladder() {
                     {t('ladder.expectedActivation')}: {item.expectedActivation}/10
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="button button--quiet"
-                  aria-label={t('common.delete')}
-                  onClick={() => void write((storage) => storage.deleteLadderItem(item.id))}
-                >
-                  <Trash2 size={18} strokeWidth={1.75} aria-hidden="true" />
-                </button>
+                {/* Two taps to delete: one stray tap should not remove work
+                    the user built up over weeks. */}
+                {armedForDelete === item.id ? (
+                  <div className="confirm-delete">
+                    <span className="muted">{t('common.confirmDelete')}</span>
+                    <button
+                      type="button"
+                      className="button button--secondary"
+                      onClick={() => deleteItem(item)}
+                    >
+                      {t('common.delete')}
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--quiet"
+                      onClick={() => setArmedForDelete(null)}
+                    >
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="button button--quiet"
+                    aria-label={t('common.delete')}
+                    onClick={() => setArmedForDelete(item.id)}
+                  >
+                    <Trash2 size={18} strokeWidth={1.75} aria-hidden="true" />
+                  </button>
+                )}
               </div>
 
               <button

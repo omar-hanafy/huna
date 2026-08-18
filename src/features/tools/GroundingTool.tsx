@@ -75,13 +75,16 @@ export function GroundingTool({ onComplete }: GroundingToolProps) {
         <span style={{ inlineSize: `${(totalNoticed / totalNeeded) * 100}%` }} />
       </div>
 
-      <div className="grounding-prompt">
+      {/* The prompt changes only when a sense is finished, so announcing it is
+          useful rather than chatty. */}
+      <div className="grounding-prompt" aria-live="polite">
         <p className="sequence-instruction__text">{t(`tools.senses.${step.key}`, { count: step.count })}</p>
         <p className="muted">{t(`tools.senseHints.${step.key}`)}</p>
       </div>
 
       <div
         className="grounding-dots"
+        role="img"
         aria-label={t('tools.noticedCount', { done: noticed, total: step.count })}
       >
         {Array.from({ length: step.count }, (_, index) => (

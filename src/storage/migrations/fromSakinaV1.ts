@@ -1,8 +1,12 @@
 import { z } from 'zod';
 import type { AppStorage } from '../AppStorage';
 import {
+  clampMinutesValue,
+  clampSleepHoursValue,
   coreTaskIdSchema,
   createEmptyTasks,
+  dayRecordSchema,
+  journalEntrySchema,
   weekNumberSchema,
   type CheckIn,
   type DayRecord,
@@ -84,43 +88,105 @@ function toWeek(value: unknown): 1 | 2 | 3 | 4 {
   return parsed.success ? parsed.data : 1;
 }
 
-function convertDay(legacy: z.infer<typeof legacyDaySchema>): DayRecord {
+/**
+ * v1 wrote dates and timestamps as whatever string it happened to hold, and the
+ * new schemas are strict. A single `2026-8-3` copied through unchanged makes
+ * every future export of this store unrestorable, so both are normalised here
+ * and anything beyond repair is dropped rather than stored.
+ */
+const LOOSE_DATE_KEY = /^(\d{4})-(\d{1,2})-(\d{1,2})$/;
+
+export function normaliseDateKey(value: string): string | null {
+  const match = LOOSE_DATE_KEY.exec(value.trim());
+  if (!match) return null;
+  const [, year, month, day] = match as unknown as [string, string, string, string];
+  const key = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  const parsed = new Date(`${key}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return null;
+  // Rejects 2026-02-31, which Date would roll forward into March.
+  return parsed.getDate() === Number(day) && parsed.getMonth() + 1 === Number(month) ? key : null;
+}
+
+export function normaliseTimestamp(value: string, fallback: Date): string {
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? fallback.toISOString() : parsed.toISOString();
+}
+
+function convertDay(legacy: z.infer<typeof legacyDaySchema>, date: string): DayRecord {
   const tasks = createEmptyTasks();
   for (const [key, done] of Object.entries(legacy.tasks)) {
     const taskId = coreTaskIdSchema.safeParse(key);
     if (taskId.success) tasks[taskId.data] = done;
   }
 
+  // A check-in whose timestamp is unreadable belongs to its own day, which is
+  // the most precise thing still known about it.
+  const midnight = new Date(`${date}T00:00:00`);
   const checkIns: CheckIn[] = legacy.checkIns.map((item) => ({
     id: item.id,
-    createdAt: item.createdAt,
+    createdAt: normaliseTimestamp(item.createdAt, midnight),
     activation: clampActivation(item.vigilance),
     note: item.note ?? null,
   }));
 
   return {
-    date: legacy.date,
+    date,
     week: toWeek(legacy.week),
     tasks,
     activation: legacy.vigilance === null ? null : clampActivation(legacy.vigilance),
-    sleepHours: legacy.sleepHours,
-    recoveryMinutes: legacy.recoveryMinutes === null ? null : Math.round(legacy.recoveryMinutes),
+    // Legacy values were never range-checked, and an out-of-range number here
+    // would poison every future export of the new store.
+    sleepHours: legacy.sleepHours === null ? null : clampSleepHoursValue(legacy.sleepHours),
+    recoveryMinutes: legacy.recoveryMinutes === null ? null : clampMinutesValue(legacy.recoveryMinutes),
     note: legacy.note,
     busyDay: false,
     checkIns,
   };
 }
 
-function convertJournal(legacy: z.infer<typeof legacyJournalSchema>): JournalEntry {
+/**
+ * The convertible payload of a legacy blob, shared with the settings importer.
+ *
+ * Every record is checked against the strict schema before it is handed back.
+ * The alternative is storing something the app can read but can never export
+ * again, which turns a rescued history into an unrestorable one.
+ */
+export function convertLegacyState(
+  legacy: LegacyState,
+  now: Date = new Date(),
+): {
+  days: DayRecord[];
+  journalEntries: JournalEntry[];
+} {
+  const days: DayRecord[] = [];
+  for (const [key, day] of Object.entries(legacy.days)) {
+    const date = normaliseDateKey(day.date) ?? normaliseDateKey(key);
+    if (date === null) continue;
+    const converted = dayRecordSchema.safeParse(convertDay(day, date));
+    if (converted.success) days.push(converted.data);
+  }
+
+  const journalEntries: JournalEntry[] = [];
+  for (const entry of legacy.journal) {
+    const converted = journalEntrySchema.safeParse(convertJournal(entry, now));
+    if (converted.success) journalEntries.push(converted.data);
+  }
+
+  return { days, journalEntries };
+}
+
+function convertJournal(legacy: z.infer<typeof legacyJournalSchema>, now: Date): JournalEntry {
   return {
     id: legacy.id,
-    createdAt: legacy.createdAt,
+    // An entry with an unreadable timestamp keeps its text and is filed as
+    // imported today; losing the writing would be the worse trade.
+    createdAt: normaliseTimestamp(legacy.createdAt, now),
     trigger: legacy.trigger,
     prediction: legacy.prediction,
     evidenceDanger: legacy.evidenceDanger,
     evidenceAlarm: legacy.evidenceAlarm,
     response: legacy.response,
-    recoveryMinutes: legacy.recoveryMinutes === null ? null : Math.round(legacy.recoveryMinutes),
+    recoveryMinutes: legacy.recoveryMinutes === null ? null : clampMinutesValue(legacy.recoveryMinutes),
     intensityBefore: clampActivation(legacy.intensityBefore),
     intensityAfter: clampActivation(legacy.intensityAfter),
   };
@@ -157,8 +223,7 @@ export async function migrateFromSakinaV1(raw: string | null, storage: AppStorag
   const legacy = legacyStateSchema.safeParse(parsedJson);
   if (!legacy.success) return { ...empty, status: 'unreadable' };
 
-  const days = Object.values(legacy.data.days).map(convertDay);
-  const journalEntries = legacy.data.journal.map(convertJournal);
+  const { days, journalEntries } = convertLegacyState(legacy.data);
   const checkIns = days.reduce((sum, day) => sum + day.checkIns.length, 0);
 
   for (const day of days) await storage.saveDay(day);
@@ -170,10 +235,15 @@ export async function migrateFromSakinaV1(raw: string | null, storage: AppStorag
     droppedFields.push('settings.gentleReminders');
   }
 
+  // The start date goes through the same normalisation: an unparseable one
+  // stored here would fail every later export just as surely as a bad day key.
+  const startedAt = legacy.data.startedAt ? new Date(legacy.data.startedAt) : null;
   await storage.savePreferences({
     reducedMotion: legacy.data.settings?.reducedMotion ?? false,
     weekOverride: legacy.data.activeWeek === undefined ? null : toWeek(legacy.data.activeWeek),
-    ...(legacy.data.startedAt ? { programStartedAt: legacy.data.startedAt } : {}),
+    ...(startedAt && !Number.isNaN(startedAt.getTime())
+      ? { programStartedAt: startedAt.toISOString() }
+      : {}),
   });
 
   await storage.saveMeta({ migratedFrom: MIGRATION_ID });

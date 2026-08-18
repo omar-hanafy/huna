@@ -1,4 +1,5 @@
-import { backupFilename, downloadJson } from '../lib/download';
+import { downloadJson, rescueFilename } from '../lib/download';
+import { HunaDatabase } from './indexeddb/db';
 
 /** The subset of the Storage API this module needs. Injectable for tests. */
 export type ReadableStore = Pick<Storage, 'length' | 'key' | 'getItem'>;
@@ -23,12 +24,11 @@ export function safeLocalStorage(): ReadableStore | null {
  * raw persistence, because it has to work when the layers above it are broken.
  * It dumps whatever it can reach and validates nothing: a partial export beats
  * no export when someone is trying to rescue a journal.
- *
- * Phase 4 extends this to also dump the IndexedDB tables.
  */
-export function collectEmergencyBundle(
+export async function collectEmergencyBundle(
   store: ReadableStore | null = safeLocalStorage(),
-): Record<string, unknown> {
+  database: HunaDatabase | null = null,
+): Promise<Record<string, unknown>> {
   const bundle: Record<string, unknown> = {
     kind: 'huna-emergency-export',
     exportedAt: new Date().toISOString(),
@@ -56,9 +56,30 @@ export function collectEmergencyBundle(
   }
 
   bundle.localStorage = local;
+
+  // The real data lives in IndexedDB: every table is dumped independently so
+  // one unreadable table cannot take the rest of the rescue with it.
+  const tables: Record<string, unknown> = {};
+  let db: HunaDatabase | null = null;
+  try {
+    db = database ?? new HunaDatabase();
+    for (const table of db.tables) {
+      try {
+        tables[table.name] = await table.toArray();
+      } catch {
+        tables[table.name] = 'unreadable';
+      }
+    }
+  } catch {
+    bundle.indexedDbError = true;
+  } finally {
+    if (db !== null && database === null) db.close();
+  }
+  bundle.indexedDb = tables;
+
   return bundle;
 }
 
-export function runEmergencyExport(): void {
-  downloadJson(backupFilename(), collectEmergencyBundle());
+export async function runEmergencyExport(): Promise<void> {
+  downloadJson(rescueFilename(), await collectEmergencyBundle());
 }

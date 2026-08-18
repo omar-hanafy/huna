@@ -46,12 +46,29 @@ export type DayRecord = z.infer<typeof dayRecordSchema>;
 export const safetyAnswerSchema = z.enum(['yes', 'no', 'unsure']);
 export type SafetyAnswer = z.infer<typeof safetyAnswerSchema>;
 
+export const alertStepSchema = z.enum([
+  'safety',
+  'danger',
+  'seal',
+  'state',
+  'sequence',
+  'action',
+  'done',
+]);
+
 export const alertSessionSchema = z.object({
   id: z.string().min(1),
   startedAt: isoSchema,
   endedAt: isoSchema.nullable(),
   safetyAnswer: safetyAnswerSchema.nullable(),
   stateId: stateIdSchema.nullable(),
+  /**
+   * The screen the user was on. Absent on records written before this was
+   * tracked, which resume from the other fields instead.
+   */
+  step: alertStepSchema.optional(),
+  /** Where in the sequence an interrupted session resumes. Absent on old records. */
+  stepIndex: z.number().int().min(0).optional(),
   activationBefore: activationSchema.nullable(),
   activationAfter: activationSchema.nullable(),
   chosenAction: z.string().nullable(),
@@ -239,6 +256,29 @@ export class StorageUnavailableError extends Error {
     this.name = 'StorageUnavailableError';
     this.cause = cause;
   }
+}
+
+/**
+ * Clamps for every numeric field a user can type freely.
+ *
+ * The schemas above are strict so a corrupt file cannot slip through import,
+ * which means every write site must stay inside their ranges: a single
+ * out-of-range number stored today poisons the backup and makes it
+ * unrestorable after an erase.
+ */
+export function clampActivationValue(value: number): number {
+  if (Number.isNaN(value)) return 0;
+  return Math.max(0, Math.min(10, Math.round(value)));
+}
+
+export function clampSleepHoursValue(value: number): number {
+  if (Number.isNaN(value)) return 0;
+  return Math.max(0, Math.min(24, value));
+}
+
+export function clampMinutesValue(value: number): number {
+  if (Number.isNaN(value)) return 0;
+  return Math.max(0, Math.min(1440, Math.round(value)));
 }
 
 export function createDefaultPreferences(now: Date): UserPreferences {

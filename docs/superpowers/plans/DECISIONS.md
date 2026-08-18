@@ -144,3 +144,140 @@ the original guard and stay inactive.
 **Why:** The guard was written for a clock or timezone change producing a wildly future
 timestamp, and that case still behaves as before. A check two seconds ahead is not that. Found by
 an e2e test that first looked flaky and turned out to be reporting a real gap.
+
+## D18 - A refresh resumes from the exercise, not from the safety answer
+
+**Context:** `resumeFrom` checked the stored safety answer before the chosen state, so someone who
+answered "not sure", pressed "I'm safe now", and started an exercise was thrown back onto the red
+danger screen by a refresh, losing their place in the sequence.
+**Decision:** Order the derivation by how far the session got: a chosen state means grounding
+began, and grounding is where the refresh lands whatever the safety answer was. Persist
+`stepIndex` on the session so it resumes on the same step rather than at step one.
+**Why:** The session record is the evidence of what actually happened. Reading the earliest field
+first meant reading the least recent fact first, which is precisely backwards for a resume.
+
+## D19 - An abandoned session stops being resumable after six hours
+
+**Context:** Any session left open resumed on the next launch, however old.
+**Decision:** `isResumable` accepts an open session younger than `RESUME_WINDOW_HOURS` (6);
+anything older starts fresh. The stale record keeps its null `endedAt`.
+**Why:** An episode is minutes long, but the danger screen tells the user to leave and reach
+safety, which can legitimately take a while, so the window is generous rather than tight. Beyond
+it, resuming would restore a stale activation reading and stretch one recorded session across
+days. Writing an `endedAt` the app never witnessed would be inventing data instead of admitting
+the session was abandoned.
+
+## D20 - "Try a different exercise" returns to the picker
+
+**Context:** The button dispatched `CHOOSE_STATE 'unsure'`, which from inside the generic sequence
+was a no-op: a dead button, mid-episode.
+**Decision:** Add a `CHANGE_EXERCISE` event that clears the chosen state and returns to the state
+picker.
+**Why:** The honest answer to "this one is not comfortable" is to offer the choice again rather
+than to substitute one fixed alternative. Clearing the state also keeps a reload honest: it
+resumes at the picker rather than back inside the exercise the user just rejected.
+
+## D21 - Debounced writes are keyed by field
+
+**Context:** `useDebouncedWrite` held a single pending mutation. Typing sleep hours and then a note
+within the debounce window discarded the sleep write entirely. Reproduced live: the day record
+kept the note and lost both numbers.
+**Decision:** Key the pending map by field, flush all of it on the trailing edge, and flush on
+`pagehide`, on `visibilitychange` to hidden, and on unmount.
+**Why:** This was silent data loss in the one screen that promises "saved automatically". Keying
+by field is the smallest change that makes the promise true; the extra flush points cover closing
+the PWA and fast navigations.
+
+## D22 - Day patches can be functions of the stored record
+
+**Context:** Toggling a task built the new `tasks` map from the copy React rendered, so two taps in
+quick succession, or a second tab, could write a stale map back.
+**Decision:** `updateDay(date, patch)` also accepts `(current) => patch`, applied inside the same
+transaction as the write. Auto-created day records now carry the week the program is actually on
+rather than defaulting to week one.
+**Why:** Read-modify-write belongs inside the transaction. The alternative, threading fresh reads
+through every caller, is the same work done less reliably in more places.
+
+## D23 - Erasing keeps the migration marker, and the legacy key is never deleted
+
+**Context:** `deleteAll` cleared the meta table. The سَكينة v1 localStorage key is deliberately
+never deleted, so the next launch re-imported the journal the user had just asked to destroy.
+**Decision:** `deleteAll` re-writes the meta record with its `migratedFrom` marker intact.
+**Why:** The marker is the only thing standing between "erase everything" and a resurrection. The
+alternative, deleting the legacy key, destroys the copy that lets a user recover if the migration
+went wrong.
+
+## D24 - A backup with out-of-range numbers is repaired, not rejected
+
+**Context:** Builds before the input clamps could store 900 hours of sleep. The strict export
+schema then refused the user's own backup, so an erase became unrecoverable.
+**Decision:** On a failed parse, clamp the known numeric fields on a copy and try once more; a raw
+سَكينة v1 blob is recognised and merged rather than replacing the store. Structural corruption
+still fails.
+**Why:** Refusing a file for a number that the app itself wrote is the worst possible moment to be
+strict. Clamping repairs the fields that a person cannot repair by hand, and merging the legacy
+blob avoids trading real data for a partial restore.
+
+## D25 - One follow-up answer closes the cluster
+
+**Context:** Two episodes inside an hour produced two prompts back to back, and the second one
+opened over whatever the user had moved on to.
+**Decision:** Answering marks every other unanswered, ended session missed, and the component
+tracks what it has closed so nothing re-opens while the writes land. The prompt on screen is also
+exempt from the expiry sweep, so its window closing cannot discard what the user is typing.
+**Why:** A check-in that repeats becomes an interrogation. Missed is the correct bucket: those
+sessions leave the return-to-life denominator rather than counting as failures the user never had
+a chance to answer for.
+
+## D26 - The service worker registers at boot, and only the accepting tab reloads
+
+**Context:** Registration lived inside the update banner, which mounts only in the app shell, so a
+user who stayed on onboarding or entered at `#/alert` never registered a worker. The library's
+prompt mode also reloads every open tab once the waiting worker takes over.
+**Decision:** Move registration into `updateWatcher`, mounted above the router, and supply
+`onNeedReload` so only the tab whose user pressed "update now" reloads. The banner never appears
+on an alert route.
+**Why:** Offline support is a safety feature here, so it cannot depend on which screen someone
+happened to open. And a background tab reloading mid-episode is exactly the interruption the
+no-skip-waiting policy exists to prevent.
+
+## D27 - Onboarding runs once, and cannot be re-entered
+
+**Context:** `#/onboarding` was registered outside the gate, and finishing it wrote fresh defaults
+over everything. One tap on skip from a stale tab wiped the trusted contacts, the breathing
+answer, the country, and the program start date.
+**Decision:** Redirect to home when `onboardingCompletedAt` is set, and preserve an existing
+`programStartedAt` when finishing.
+**Why:** There is nothing to redo, so there is nothing to show. Preserving the start date stops a
+re-entry from silently moving someone back to week one.
+
+## D28 - The alert flow is never gated, and unreadable storage says so
+
+**Context:** The gate waited for preferences, which never arrive when IndexedDB is blocked, so the
+app sat on a blank busy screen forever.
+**Decision:** Let `/alert` through the gate whether or not onboarding is done, run the alert flow
+on default preferences when storage reports a problem, and show the storage notice instead of the
+spinner.
+**Why:** Someone whose first contact with the app is an episode should reach the sequences, not a
+setup wizard. And a browser with storage disabled should be told, while the part of the app that
+does not need storage keeps working.
+
+## D29 - Arabic plurals are real plural families
+
+**Context:** "منذ 10 دقيقة" and "مارست 1 مرات" were coming out of single-form strings with a number
+interpolated.
+**Decision:** Give every counted string the six Arabic categories (`_zero` through `_other`) and
+the English ones, pass `count` rather than a bare number, and teach the locale-parity guard to
+compare base keys with their placeholder unions.
+**Why:** The app speaks Arabic first. A grammatical mistake in every seal and every progress line
+is not a rounding error, it is the app sounding like a machine at the moment it is trying to sound
+like a person.
+
+## D30 - The week tabs on the program screen stay an override
+
+**Context:** Tapping a week tab writes `weekOverride`, so browsing week 3 changes which week the
+program is on.
+**Decision:** Keep it. The behaviour is deliberate and documented in the component.
+**Why:** Weeks are suggested, never enforced, and someone who opens week 3 and starts using it has
+in fact moved to week 3. The alternative, a preview mode that forgets, would make the tabs lie
+about what they do.

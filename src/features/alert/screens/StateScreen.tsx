@@ -14,8 +14,11 @@ import { useAlertFlow } from '../useAlertFlow';
  */
 export function StateScreen() {
   const { t, i18n } = useTranslation();
-  const { dispatch } = useAlertFlow();
-  const [activation, setActivation] = useState(5);
+  const { state, dispatch } = useAlertFlow();
+  // Seeded from what the user already reported, so coming back here through
+  // "try a different exercise", or through a reload, does not quietly replace
+  // their number with the slider's default.
+  const [activation, setActivation] = useState(state.activationBefore ?? 5);
 
   const locale: Locale = i18n.language === 'en' ? 'en' : 'ar';
   const sequences = CONTENT[locale].sequences.sequences;

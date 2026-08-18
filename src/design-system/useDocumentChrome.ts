@@ -11,6 +11,8 @@ import type { UserPreferences } from '../storage/types';
  * disagree about which wins: the toggle only ever adds the attribute, never
  * removes the media query.
  */
+const THEME_COLORS = { light: '#F7F4EE', dark: '#141C1A' } as const;
+
 export function useDocumentChrome(preferences: UserPreferences | undefined): void {
   useEffect(() => {
     if (!preferences) return;
@@ -20,6 +22,14 @@ export function useDocumentChrome(preferences: UserPreferences | undefined): voi
 
     if (preferences.theme === 'system') root.removeAttribute('data-theme');
     else root.setAttribute('data-theme', preferences.theme);
+
+    // The static meta tags switch on the OS scheme; an in-app override must
+    // retarget them or an installed PWA's system chrome contradicts the page.
+    const metas = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
+    metas.forEach((meta) => {
+      const scheme = meta.media.includes('dark') ? 'dark' : 'light';
+      meta.content = preferences.theme === 'system' ? THEME_COLORS[scheme] : THEME_COLORS[preferences.theme];
+    });
 
     if (preferences.reducedMotion) root.setAttribute('data-reduced-motion', 'true');
     else root.removeAttribute('data-reduced-motion');

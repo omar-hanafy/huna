@@ -29,7 +29,10 @@ export function SealScreen() {
           <p className="muted">
             {t('alert.seal.checkedAt', {
               time: formatTime(check.at, i18n.language),
-              minutes: lockout.minutesAgo ?? 0,
+              // `count` rather than a plain number: Arabic needs دقيقة, دقيقتان
+              // and دقائق for the same sentence, and the app's own language
+              // should not read like a machine wrote it.
+              count: lockout.minutesAgo ?? 0,
             })}
           </p>
         ) : null}

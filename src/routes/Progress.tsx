@@ -33,7 +33,14 @@ export function Progress() {
   const write = useWrite();
   const now = useNow();
 
-  if (preferences && !preferences.showMetrics) {
+  // Everything below reads three live queries. Rendering before they land
+  // showed a full page of dashes and zeroes to someone who came here for a
+  // trend, so wait the one frame out.
+  if (preferences === undefined || sessions === undefined || checks === undefined) {
+    return <div className="screen screen--narrow progress" aria-busy="true" />;
+  }
+
+  if (!preferences.showMetrics) {
     return (
       <div className="screen screen--narrow progress">
         <h1>{t('progress.title')}</h1>
@@ -49,12 +56,12 @@ export function Progress() {
     );
   }
 
-  const all = sessions ?? [];
+  const all = sessions;
   const stats = returnToLifeStats(all);
   const median = medianSessionMinutes(all);
   const drop = medianActivationDrop(all);
   const short = sessionsUnderTwoMinutes(all);
-  const daily = checksPerDay(checks ?? [], now, 14);
+  const daily = checksPerDay(checks, now, 14);
   const maxChecks = Math.max(1, ...daily.map((day) => day.count));
 
   const thisWeek = all.filter(

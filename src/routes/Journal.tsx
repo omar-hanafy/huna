@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ActivationSlider } from '../components/ActivationSlider';
-import { formatTime } from '../lib/date';
+import { formatDateTime } from '../lib/date';
 import { createId } from '../lib/id';
 import { useJournalEntries, useWrite } from '../storage/hooks';
+import { clampMinutesValue } from '../storage/types';
 import './Journal.css';
 
 const FIELDS = ['trigger', 'prediction', 'evidenceDanger', 'evidenceAlarm', 'response'] as const;
@@ -39,6 +40,7 @@ export function Journal() {
   const [before, setBefore] = useState(7);
   const [after, setAfter] = useState(5);
   const [recovery, setRecovery] = useState('');
+  const [armedForDelete, setArmedForDelete] = useState<string | null>(null);
 
   const canSave = FIELDS.some((field) => draft[field].trim().length > 0);
 
@@ -52,7 +54,9 @@ export function Journal() {
         evidenceDanger: draft.evidenceDanger.trim(),
         evidenceAlarm: draft.evidenceAlarm.trim(),
         response: draft.response.trim(),
-        recoveryMinutes: recovery === '' ? null : Number(recovery),
+        // Clamped at the write site: an out-of-range number stored today makes
+        // the whole backup unrestorable later.
+        recoveryMinutes: recovery === '' ? null : clampMinutesValue(Number(recovery)),
         intensityBefore: before,
         intensityAfter: after,
       }),
@@ -123,15 +127,40 @@ export function Journal() {
           entries.map((entry) => (
             <article key={entry.id} className="card journal-entry">
               <div className="journal-entry__head">
-                <span className="eyebrow">{formatTime(entry.createdAt, i18n.language)}</span>
-                <button
-                  type="button"
-                  className="button button--quiet"
-                  aria-label={t('common.delete')}
-                  onClick={() => void write((storage) => storage.deleteJournalEntry(entry.id))}
-                >
-                  <Trash2 size={18} strokeWidth={1.75} aria-hidden="true" />
-                </button>
+                <span className="eyebrow">{formatDateTime(entry.createdAt, i18n.language)}</span>
+                {/* Two taps to delete, like the ladder: written reflection is
+                    not something to lose to a mis-tap. */}
+                {armedForDelete === entry.id ? (
+                  <div className="confirm-delete">
+                    <span className="muted">{t('common.confirmDelete')}</span>
+                    <button
+                      type="button"
+                      className="button button--secondary"
+                      onClick={() => {
+                        setArmedForDelete(null);
+                        void write((storage) => storage.deleteJournalEntry(entry.id));
+                      }}
+                    >
+                      {t('common.delete')}
+                    </button>
+                    <button
+                      type="button"
+                      className="button button--quiet"
+                      onClick={() => setArmedForDelete(null)}
+                    >
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="button button--quiet"
+                    aria-label={t('common.delete')}
+                    onClick={() => setArmedForDelete(entry.id)}
+                  >
+                    <Trash2 size={18} strokeWidth={1.75} aria-hidden="true" />
+                  </button>
+                )}
               </div>
 
               {FIELDS.filter((field) => entry[field]).map((field) => (

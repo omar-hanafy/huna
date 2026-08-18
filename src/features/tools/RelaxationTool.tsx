@@ -16,6 +16,9 @@ const RELEASE_SECONDS = 9;
  * Wall-clock timed for the same reason as the breathing pacer. The release is
  * deliberately longer than the tension, and the copy repeats that any painful
  * area should be skipped rather than pushed through.
+ *
+ * Pause keeps the elapsed time. It used to discard it, so pausing at the legs
+ * and resuming started again at the face - a quiet punishment for stopping.
  */
 export function RelaxationTool({ onComplete }: RelaxationToolProps) {
   const { t } = useTranslation();
@@ -24,7 +27,9 @@ export function RelaxationTool({ onComplete }: RelaxationToolProps) {
   const [phase, setPhase] = useState<'tense' | 'release'>('tense');
   const [remaining, setRemaining] = useState(TENSE_SECONDS);
   const [complete, setComplete] = useState(false);
+  const [started, setStarted] = useState(false);
   const startedAt = useRef<number | null>(null);
+  const elapsedBeforePause = useRef(0);
   const notified = useRef(false);
 
   useEffect(() => {
@@ -33,8 +38,9 @@ export function RelaxationTool({ onComplete }: RelaxationToolProps) {
     const total = cycle * GROUPS.length;
 
     const tick = () => {
-      if (startedAt.current === null) startedAt.current = performance.now();
-      const elapsed = (performance.now() - startedAt.current) / 1000;
+      const now = performance.now();
+      if (startedAt.current === null) startedAt.current = now;
+      const elapsed = elapsedBeforePause.current + (now - startedAt.current) / 1000;
 
       if (elapsed >= total) {
         setRunning(false);
@@ -64,11 +70,28 @@ export function RelaxationTool({ onComplete }: RelaxationToolProps) {
   const reset = () => {
     setRunning(false);
     setComplete(false);
+    setStarted(false);
     setIndex(0);
     setPhase('tense');
     setRemaining(TENSE_SECONDS);
     startedAt.current = null;
+    elapsedBeforePause.current = 0;
     notified.current = false;
+  };
+
+  const pause = () => {
+    if (startedAt.current !== null) {
+      elapsedBeforePause.current += (performance.now() - startedAt.current) / 1000;
+      startedAt.current = null;
+    }
+    setRunning(false);
+  };
+
+  const start = () => {
+    if (complete) reset();
+    startedAt.current = null;
+    setStarted(true);
+    setRunning(true);
   };
 
   const group = GROUPS[Math.min(index, GROUPS.length - 1)]!;
@@ -81,12 +104,20 @@ export function RelaxationTool({ onComplete }: RelaxationToolProps) {
       </div>
 
       {complete ? (
-        <p className="lede">{t('tools.relaxationDone')}</p>
+        <p className="lede" role="status">
+          {t('tools.relaxationDone')}
+        </p>
       ) : (
         <div className="grounding-prompt">
           <p className="sequence-instruction__text">{t(`tools.muscleGroups.${group}`)}</p>
           <p className="muted">
             {phase === 'tense' ? t('tools.tenseNow') : t('tools.releaseNow')} · {remaining}
+          </p>
+          {/* Announced in place of the two lines above: the group and what to
+              do with it change rarely, the seconds change constantly and would
+              talk over everything else. */}
+          <p className="sr-only" aria-live="polite">
+            {`${t(`tools.muscleGroups.${group}`)} · ${phase === 'tense' ? t('tools.tenseNow') : t('tools.releaseNow')}`}
           </p>
         </div>
       )}
@@ -97,20 +128,12 @@ export function RelaxationTool({ onComplete }: RelaxationToolProps) {
 
       <div className="tool__controls">
         {running ? (
-          <button type="button" className="button button--secondary" onClick={() => setRunning(false)}>
+          <button type="button" className="button button--secondary" onClick={pause}>
             {t('tools.pause')}
           </button>
         ) : (
-          <button
-            type="button"
-            className="button button--primary"
-            onClick={() => {
-              if (complete) reset();
-              startedAt.current = null;
-              setRunning(true);
-            }}
-          >
-            {complete ? t('tools.restart') : t('tools.start')}
+          <button type="button" className="button button--primary" onClick={start}>
+            {complete ? t('tools.restart') : started ? t('tools.resume') : t('tools.start')}
           </button>
         )}
         <button type="button" className="button button--quiet" onClick={reset}>
