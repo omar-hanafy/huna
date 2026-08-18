@@ -99,13 +99,7 @@ export function FollowUpPrompt() {
   // Keyed by session so the slider and the note never carry over from the
   // episode before this one.
   return (
-    <FollowUpDialog
-      key={active.id}
-      session={active}
-      onShown={hold}
-      onAnswer={answer}
-      onDismiss={dismiss}
-    />
+    <FollowUpDialog key={active.id} session={active} onShown={hold} onAnswer={answer} onDismiss={dismiss} />
   );
 }
 

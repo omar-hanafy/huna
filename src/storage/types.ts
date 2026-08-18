@@ -46,15 +46,7 @@ export type DayRecord = z.infer<typeof dayRecordSchema>;
 export const safetyAnswerSchema = z.enum(['yes', 'no', 'unsure']);
 export type SafetyAnswer = z.infer<typeof safetyAnswerSchema>;
 
-export const alertStepSchema = z.enum([
-  'safety',
-  'danger',
-  'seal',
-  'state',
-  'sequence',
-  'action',
-  'done',
-]);
+export const alertStepSchema = z.enum(['safety', 'danger', 'seal', 'state', 'sequence', 'action', 'done']);
 
 export const alertSessionSchema = z.object({
   id: z.string().min(1),

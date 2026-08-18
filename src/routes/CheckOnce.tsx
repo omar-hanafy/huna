@@ -37,8 +37,7 @@ export function CheckOnce() {
   const [acknowledged, setAcknowledged] = useState(false);
   const [logged, setLogged] = useState<string | null>(null);
 
-  const label = (target: string) =>
-    t(`safetyChecks.targets.${target}`, { defaultValue: target });
+  const label = (target: string) => t(`safetyChecks.targets.${target}`, { defaultValue: target });
 
   const log = (target: string) => {
     void write((storage) =>

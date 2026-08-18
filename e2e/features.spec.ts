@@ -4,6 +4,20 @@ async function start({ page }: { page: Page }) {
   await page.goto('./');
   await page.getByRole('button', { name: 'تخطَّ' }).click();
   await expect(page).toHaveURL(/#\/$/);
+  // The navigation happens before the write lands. Anything that leaves home
+  // straight away would be gated back into onboarding by the stored record.
+  await page.waitForFunction(async () => {
+    const request = indexedDB.open('huna');
+    const db = await new Promise<IDBDatabase>((resolve) => {
+      request.onsuccess = () => resolve(request.result);
+    });
+    const rows = await new Promise<Record<string, unknown>[]>((resolve) => {
+      const query = db.transaction('preferences', 'readonly').objectStore('preferences').getAll();
+      query.onsuccess = () => resolve(query.result as Record<string, unknown>[]);
+    });
+    db.close();
+    return rows.some((row) => row.onboardingCompletedAt !== null);
+  });
 }
 
 test.describe('check once', () => {
@@ -195,12 +209,12 @@ test.describe('the daily routine', () => {
       const db = await new Promise<IDBDatabase>((resolve) => {
         open.onsuccess = () => resolve(open.result);
       });
-      const days = await new Promise<{ sleepHours: number | null; recoveryMinutes: number | null; note: string }[]>(
-        (resolve) => {
-          const request = db.transaction('days', 'readonly').objectStore('days').getAll();
-          request.onsuccess = () => resolve(request.result);
-        },
-      );
+      const days = await new Promise<
+        { sleepHours: number | null; recoveryMinutes: number | null; note: string }[]
+      >((resolve) => {
+        const request = db.transaction('days', 'readonly').objectStore('days').getAll();
+        request.onsuccess = () => resolve(request.result);
+      });
       db.close();
       return days.some((day) => day.sleepHours === 7 && day.recoveryMinutes === 30 && day.note === 'المشي');
     });

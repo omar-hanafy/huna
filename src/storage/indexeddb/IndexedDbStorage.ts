@@ -24,11 +24,7 @@ import {
   type UserPreferences,
   type ValueCommitment,
 } from '../types';
-import {
-  clampActivationValue,
-  clampMinutesValue,
-  clampSleepHoursValue,
-} from '../types';
+import { clampActivationValue, clampMinutesValue, clampSleepHoursValue } from '../types';
 import { convertLegacyState, legacyStateSchema } from '../migrations/fromSakinaV1';
 import { HunaDatabase, SCHEMA_VERSION, wrapStorageErrors } from './db';
 
@@ -50,11 +46,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function clampField(
-  target: Record<string, unknown>,
-  key: string,
-  clamp: (value: number) => number,
-): void {
+function clampField(target: Record<string, unknown>, key: string, clamp: (value: number) => number): void {
   const value = target[key];
   if (typeof value === 'number') target[key] = clamp(value);
 }
@@ -251,10 +243,7 @@ export class IndexedDbStorage implements AppStorage {
     await wrapStorageErrors(() => this.db.days.put(record));
   }
 
-  async updateDay(
-    date: string,
-    patch: DayPatch | ((current: DayRecord) => DayPatch),
-  ): Promise<DayRecord> {
+  async updateDay(date: string, patch: DayPatch | ((current: DayRecord) => DayPatch)): Promise<DayRecord> {
     return wrapStorageErrors(() =>
       this.db.transaction('rw', [this.db.days, this.db.preferences], async () => {
         const preferences =

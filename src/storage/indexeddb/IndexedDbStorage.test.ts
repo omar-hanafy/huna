@@ -415,7 +415,14 @@ describe('export and import', () => {
       journalEntries: [journalEntry],
       alertSessions: [alertSession({ activationBefore: 88, activationAfter: -2, stepIndex: -4 })],
       ladderItems: [
-        { id: 'l1', title: 'x', expectedActivation: 77, order: -2, createdAt: FIXED_NOW.toISOString(), archived: false },
+        {
+          id: 'l1',
+          title: 'x',
+          expectedActivation: 77,
+          order: -2,
+          createdAt: FIXED_NOW.toISOString(),
+          archived: false,
+        },
       ],
       ladderSessions: [
         {

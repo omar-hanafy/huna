@@ -241,9 +241,7 @@ export async function migrateFromSakinaV1(raw: string | null, storage: AppStorag
   await storage.savePreferences({
     reducedMotion: legacy.data.settings?.reducedMotion ?? false,
     weekOverride: legacy.data.activeWeek === undefined ? null : toWeek(legacy.data.activeWeek),
-    ...(startedAt && !Number.isNaN(startedAt.getTime())
-      ? { programStartedAt: startedAt.toISOString() }
-      : {}),
+    ...(startedAt && !Number.isNaN(startedAt.getTime()) ? { programStartedAt: startedAt.toISOString() } : {}),
   });
 
   await storage.saveMeta({ migratedFrom: MIGRATION_ID });

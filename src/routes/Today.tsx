@@ -200,7 +200,9 @@ export function Today() {
               onChange={(event) => {
                 const raw = event.target.value;
                 const value = raw === '' ? null : clampMinutesValue(Number(raw));
-                schedule('recoveryMinutes', (storage) => storage.updateDay(today, { recoveryMinutes: value }));
+                schedule('recoveryMinutes', (storage) =>
+                  storage.updateDay(today, { recoveryMinutes: value }),
+                );
               }}
               onBlur={clampOnBlur(clampMinutesValue)}
             />
@@ -212,9 +214,7 @@ export function Today() {
           label={t('today.dayRating')}
           value={record.activation ?? 5}
           onChange={(value) =>
-            void write((storage) =>
-              storage.updateDay(today, { activation: clampActivationValue(value) }),
-            )
+            void write((storage) => storage.updateDay(today, { activation: clampActivationValue(value) }))
           }
         />
 
