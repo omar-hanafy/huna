@@ -281,3 +281,55 @@ program is on.
 **Why:** Weeks are suggested, never enforced, and someone who opens week 3 and starts using it has
 in fact moved to week 3. The alternative, a preview mode that forgets, would make the tabs lie
 about what they do.
+
+## D31 - The session records which screen the user was on
+
+**Context:** `resumeFrom` derived the screen from the session's fields. That works
+until a field is cleared: "try a different exercise" clears the chosen state, so a
+reload derived "no state, answer was not sure" and sent the user back to the danger
+screen they had already left.
+**Decision:** Persist `step` on the session and prefer it on resume, falling back to
+the derivation for records written before it existed. A recorded `sequence` step with
+no chosen state is the one pair that is checked rather than trusted.
+**Why:** The screen is a fact about the session, and deriving a fact you could have
+recorded is how the previous ordering bug happened in the first place.
+
+## D32 - The crash-screen export is a rescue, and the importer reads it
+
+**Context:** The rescue file was named like a backup and shaped like neither: it holds
+raw table dumps, which `importAll` refused on all three of its paths. Someone who
+exported from the error screen held a file nothing would read.
+**Decision:** Name it `huna-rescue-<date>.json`, and teach the importer to recognise
+the dump and reshape it into a bundle before validating.
+**Why:** An export offered at the worst moment has to be worth taking. Two files in a
+downloads folder also have to be tellable apart.
+
+## D33 - The legacy importer repairs dates rather than trusting them
+
+**Context:** سَكينة v1 wrote whatever string it held. A day key of `2026-8-3` or a
+timestamp of `2026-08-03 09:00` satisfies nothing in the current schema, so importing
+one produced a store whose own export could never be imported again.
+**Decision:** Normalise date keys and timestamps, validate every converted record
+against its schema, and drop what cannot be repaired. A journal entry with an
+unreadable timestamp keeps its text and is filed as imported today.
+**Why:** Same principle as the numeric clamps: the boundary is where a bad value gets
+fixed, and losing someone's writing to a bad date would be the worse trade.
+
+## D34 - The storage notice carries its own colour pair
+
+**Context:** The banner used the amber accent with hard-coded dark ink. Discreet mode
+collapses every accent into the neutral border colour, which in dark mode is a dark
+slate: the notice became dark text on a dark ground.
+**Decision:** Give it `--notice-bg` and `--notice-ink` as a pair, redefined together
+in every theme and in discreet mode.
+**Why:** It is the one surface that must stay readable whatever else is switched on,
+and a token that carries text cannot be flattened by a rule written for fills.
+
+## D35 - The follow-up prompt does not take the keyboard
+
+**Context:** The prompt can appear on a clock tick. Focusing its heading on mount
+pulled the caret out of whatever the user was writing.
+**Decision:** Focus the heading only when the user is not typing; otherwise announce
+the prompt through a visually hidden status line.
+**Why:** A screen-reader user still learns it is there, and nobody loses a sentence to
+an optional question. It is a check-in, not a summons.
